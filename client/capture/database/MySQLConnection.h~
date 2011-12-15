@@ -1,0 +1,24 @@
+/*
+ * MySQLConnection.h
+ *
+ */
+
+#ifndef MYSQLCONNECTION_H_
+#define MYSQLCONNECTION_H_
+
+#include "DatabaseConnection.h"
+#include <boost/regex.hpp>
+
+class MySQLConnection: public DatabaseConnection {
+private:
+	static log4cxx::LoggerPtr logger;
+public:
+	MySQLConnection();
+	virtual ~MySQLConnection();
+
+protected:
+	bool parseRequest(int data_offset);
+	bool parseReponse();
+};
+
+#endif /* MYSQLCONNECTION_H_ */
