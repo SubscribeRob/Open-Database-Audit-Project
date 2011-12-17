@@ -1,0 +1,3 @@
+odap-charsets.o: include/charsets.cpp include/charsets.h
+
+include/charsets.h:

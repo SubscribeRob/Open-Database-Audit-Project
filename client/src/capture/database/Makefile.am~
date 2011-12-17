@@ -1,0 +1,3 @@
+lib_LTLIBRARIES = libdatabase.la
+libdatabase_la_SOURCES = DatabaseConnection.cpp  DatabaseConnection.h  DB2Connection.cpp  DB2Connection.h  MySQLConnection.cpp  MySQLConnection.h
+libdatabase_la_CPPFLAGS = $(DEPS_CFLAGS) -I../../

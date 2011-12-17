@@ -1,0 +1,3 @@
+charsets.lo: charsets.cpp charsets.h
+
+charsets.h:
