@@ -1,0 +1,8 @@
+Building from source to install isn't as easy as it should be. I'm
+making changes to use autotools, maven, and git but there are a 
+large number of components which all work together. If anyone
+is interested in working on source development our building from
+source contact me through the website and I will glad to work with 
+with you to get you up and going. Plus that will give me a reason
+to document the proces for others. As I will be making a wide range
+of pre-built binaries I expect *almost* everyone to go that route.
