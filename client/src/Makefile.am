@@ -9,6 +9,6 @@ odap_SOURCES = CachedUserInfo.h CachedUserManager.h ConfigFile.h  EventQueue.h m
 	       protocol/Config.cpp  protocol/Config.h protocol/AuditEvent.cpp protocol/AuditEvent.h \
 	       protocol/auditevent_constants.cpp protocol/auditevent_types.cpp
 
-odap_LDADD = -lpcap -lrt $(BOOST_THREAD_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_THREAD_LIBS)
+odap_LDADD = -lpcap -lrt -lssl -laprutil-1 -lapr-1 $(BOOST_THREAD_LIBS) $(BOOST_REGEX_LIBS) $(BOOST_THREAD_LIBS)
 odap_CPPFLAGS = $(BOOST_CPPFLAGS)
 odap_LIBS = $(BOOST_THREAD_LIBS)
