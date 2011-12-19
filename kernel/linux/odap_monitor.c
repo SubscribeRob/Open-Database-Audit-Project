@@ -39,7 +39,7 @@
 #include <linux/ctype.h>
 #include <net/sock.h>
 #include <net/tcp.h>
-
+#include <linux/version.h>
 
 #define DEVICE_MAX_SIZE		1024*1024		// How much audit information to keep before discarding
 #define PROC_V			"/proc/version" 	// Location of the current running kernel version
@@ -243,7 +243,11 @@ static int udmp_stream_sendmsg(struct kiocb *iocb, struct socket *sock, struct m
 		if (sock->sk) {
 			for_each_process(p) {
 				/* Peercred->pid contains tgid of the process */
-				if (p->tgid == sock->sk->sk_peercred.pid)
+				#if LINUX_VERSION_CODE > 132656
+					if(p->tgid == sock->sk->sk_peer_cred->tgcred->tgid)
+				#else
+					if (p->tgid == sock->sk->sk_peercred.pid)
+				#endif
 					break;
 			}
 
