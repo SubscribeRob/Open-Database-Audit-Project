@@ -1,4 +1,4 @@
-#%define _topdir	 	/home/rob/rpm
+#%define _topdir	 	/home/rob/source
 %define name		odap-client
 %define release		1
 %define version 	0.9
@@ -18,16 +18,24 @@ URL:            http://www.opendbaudit.com
 Database Auditing Software
 
 %build
+cd client
+make
+cd ..
+cd kernel/linux
 make
 
 %install
+cd client
+make install prefix=$RPM_BUILD_ROOT/opt/odap
+cd ..
+cd kernel/linux
 make install prefix=$RPM_BUILD_ROOT
 
 %files
 %defattr(-,root,root)
-/opt/dbauditcloud/bin/CloudCapture
-/opt/dbauditcloud/bin/certificate.pem
-/opt/dbauditcloud/bin/log4j.properties
-/opt/dbauditcloud/kernel/dbaudit.ko
-/etc/init.d/dbauditcloud
-/opt/dbauditcloud/bin/dbauditcloud-daemon
+/opt/odap/bin/odap
+/opt/odap/bin/certificate.pem
+/opt/odap/bin/log4j.properties
+/opt/odap/kernel/odap_monitor.ko
+/etc/init.d/odap
+/opt/odap/bin/odap-daemon

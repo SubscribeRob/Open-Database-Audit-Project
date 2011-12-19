@@ -1,0 +1,77 @@
+#/bin/bash
+#
+# (c) Copyright 2011 Rob Williams Consulting Inc.
+#
+#
+
+source /etc/rc.d/init.d/functions
+
+PIDFILE="/var/run/dbauditcloud.pid"
+LOCKFILE="/var/lock/subsys/dbauditcloud"
+RETVAL_SUCCESS=0
+
+start() {
+  echo -n $"Starting DB Audit Cloud Service: "
+  daemon /opt/dbauditcloud/bin/dbauditcloud-daemon start
+  RETVAL=$?
+  [ $RETVAL -eq $RETVAL_SUCCESS ] && touch $LOCKFILE
+  return $RETVAL
+
+}
+
+stop(){
+  echo -n $"Stopping DB Audit Cloud Service: "
+  daemon /opt/dbauditcloud/bin/dbauditcloud-daemon stop
+  RETVAL=$?
+  [ $RETVAL -eq $RETVAL_SUCCESS ] && rm -f $LOCKFILE $PIDFILE
+  return $RETVAL
+}
+
+checkstatus(){
+  status -p $PIDFILE
+  RETVAL=$?
+}
+
+condrestart(){
+  [ -e $LOCKFILE ] && restart || :
+}
+
+check_for_root() {
+  if [ $(id -ur) -ne 0 ]; then
+    echo 'Error: root user is required'
+    echo
+     exit 1
+  fi
+}
+
+
+dbauditcloudservice() {
+  case "$1" in
+    start)
+      check_for_root
+      start
+      ;;
+    stop)
+      check_for_root
+      stop
+      ;;
+    status)
+      checkstatus
+      ;;
+    restart)
+      check_for_root
+      restart
+      ;;
+    condrestart|try-restart)
+      check_for_root
+      condrestart
+      ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart}"
+        exit 1
+  esac
+}
+
+dbauditcloudservice "$1"
+
+exit $RETVAL
