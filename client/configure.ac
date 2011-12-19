@@ -26,8 +26,6 @@ AC_THRIFT_CHECK
 #                 [AC_MSG_ERROR([log4cxx headers not found. Ensure log4cxx is installed])])
 
 # Checks for libraries.
-# FIXME: Replace `main' with a function in `-llog4cxx':
-AC_CHECK_LIB([log4cxx], [main])
 # FIXME: Replace `main' with a function in `-lpcap':
 AC_CHECK_LIB([pcap], [main])
 # FIXME: Replace `main' with a function in `-lrt':
