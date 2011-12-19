@@ -1,0 +1,74 @@
+#/bin/bash
+#
+
+source /etc/rc.d/init.d/functions
+
+PIDFILE="/var/run/odap.pid"
+LOCKFILE="/var/lock/subsys/odap"
+RETVAL_SUCCESS=0
+
+start() {
+  echo -n $"Starting odap service: "
+  daemon /opt/odap/bin/odap-daemon start
+  RETVAL=$?
+  [ $RETVAL -eq $RETVAL_SUCCESS ] && touch $LOCKFILE
+  return $RETVAL
+
+}
+
+stop(){
+  echo -n $"Stopping odap service: "
+  daemon /opt/odap/bin/odap-daemon stop
+  RETVAL=$?
+  [ $RETVAL -eq $RETVAL_SUCCESS ] && rm -f $LOCKFILE $PIDFILE
+  return $RETVAL
+}
+
+checkstatus(){
+  status -p $PIDFILE
+  RETVAL=$?
+}
+
+condrestart(){
+  [ -e $LOCKFILE ] && restart || :
+}
+
+check_for_root() {
+  if [ $(id -ur) -ne 0 ]; then
+    echo 'Error: root user is required'
+    echo
+     exit 1
+  fi
+}
+
+
+odapservice() {
+  case "$1" in
+    start)
+      check_for_root
+      start
+      ;;
+    stop)
+      check_for_root
+      stop
+      ;;
+    status)
+      checkstatus
+      ;;
+    restart)
+      check_for_root
+      restart
+      ;;
+    condrestart|try-restart)
+      check_for_root
+      condrestart
+      ;;
+    *)
+        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart}"
+        exit 1
+  esac
+}
+
+odapservice "$1"
+
+exit $RETVAL
