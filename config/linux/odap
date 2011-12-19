@@ -1,18 +1,15 @@
 #/bin/bash
 #
-# (c) Copyright 2011 Rob Williams Consulting Inc.
-#
-#
 
 source /etc/rc.d/init.d/functions
 
-PIDFILE="/var/run/dbauditcloud.pid"
-LOCKFILE="/var/lock/subsys/dbauditcloud"
+PIDFILE="/var/run/odap.pid"
+LOCKFILE="/var/lock/subsys/odap"
 RETVAL_SUCCESS=0
 
 start() {
-  echo -n $"Starting DB Audit Cloud Service: "
-  daemon /opt/dbauditcloud/bin/dbauditcloud-daemon start
+  echo -n $"Starting odap service: "
+  daemon /opt/odap/bin/odap-daemon start
   RETVAL=$?
   [ $RETVAL -eq $RETVAL_SUCCESS ] && touch $LOCKFILE
   return $RETVAL
@@ -20,8 +17,8 @@ start() {
 }
 
 stop(){
-  echo -n $"Stopping DB Audit Cloud Service: "
-  daemon /opt/dbauditcloud/bin/dbauditcloud-daemon stop
+  echo -n $"Stopping odap service: "
+  daemon /opt/odap/bin/odap-daemon stop
   RETVAL=$?
   [ $RETVAL -eq $RETVAL_SUCCESS ] && rm -f $LOCKFILE $PIDFILE
   return $RETVAL
@@ -45,7 +42,7 @@ check_for_root() {
 }
 
 
-dbauditcloudservice() {
+odapservice() {
   case "$1" in
     start)
       check_for_root
@@ -72,6 +69,6 @@ dbauditcloudservice() {
   esac
 }
 
-dbauditcloudservice "$1"
+odapservice "$1"
 
 exit $RETVAL

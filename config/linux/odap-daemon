@@ -1,13 +1,13 @@
 #!/usr/bin/env bash
-# Run DB Audit Cloud command as a daemon
+# Run odap command as a daemon
 #
 ##
 
-PIDFILE="/var/run/dbauditcloud.pid"
-LOCKFILE="/var/lock/subsys/dbauditcloud"
+PIDFILE="/var/run/odap.pid"
+LOCKFILE="/var/lock/subsys/odap"
 RETVAL_SUCCESS=0
 
-usage="Usage: dbauditcloud-daemon (start|stop)"
+usage="Usage: odap-daemon (start|stop)"
 if [ $# -ne 1 ]; then
 	echo $usage
 	exit 1
@@ -30,15 +30,12 @@ case $startStop in
 		exit 1
 	      fi
 	    fi
-	     KERN=`insmod $bin/../kernel/dbaudit.ko &> $bin/../logs/insmod.log`
-	     chardev=`cat /var/log/messages |grep reg | grep -o 'major=[0-9]*' | grep -o '[0-9]*' | tail -n1`
-	     NODE=`mknod /dev/dbauditcloud c $chardev 0 &> $bin/../logs/mknod.log`
-     	     PROG=`cd $bin;nohup ./CloudCapture &> /dev/null &`
-	     ps -fe | grep ./CloudCapture | head -n1 | cut -d" " -f 6 > $PIDFILE
+     	     PROG=`cd $bin;nohup ./odap &> /dev/null &`
+	     ps -fe | grep ./odap | head -n1 | cut -d" " -f 6 > $PIDFILE
 	     RETVAL=$?
 	     if [ $RETVAL -ne $RETVAL_SUCCESS ]; then
 			rmmod dbaudit
-			rm /dev/dbauditcloud
+			rm /dev/odap
 			exit 2
 	     fi
 	    ;;
@@ -48,13 +45,12 @@ case $startStop in
 	      if kill -0 `cat $PIDFILE` > /dev/null 2>&1; then
 		echo stopping $command
 		kill `cat $PIDFILE`
-		rmmod dbaudit
-	        rm /dev/dbauditcloud
+		rmmod odap_monitor &> /dev/null
 	      else
-		echo DB Audit Cloud not running
+		echo odap not running
 	      fi
 	    else
-	      echo DB Audit Cloud not running
+	      echo odap not running
 	    fi
 	    ;;
 
