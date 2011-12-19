@@ -35,6 +35,7 @@ make install prefix=$RPM_BUILD_ROOT
 %defattr(-,root,root)
 /opt/odap/bin/odap
 /opt/odap/bin/certificate.pem
+/opt/odap/bin/config.ini
 /opt/odap/bin/log4j.properties
 /opt/odap/kernel/odap_monitor.ko
 /etc/init.d/odap
