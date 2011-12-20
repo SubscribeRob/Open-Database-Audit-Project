@@ -1,7 +1,7 @@
 #                                               -*- Autoconf -*-
 # Process this file with autoconf to produce a configure script.
 
-AC_PREREQ([2.63])
+AC_PREREQ([2.59])
 AC_INIT([Open Database Audit Project], [0.9.0], [www.opendbaudit.com])
 AC_CONFIG_SRCDIR([src/CachedUserInfo.cpp])
 AC_CONFIG_HEADERS([config.h])
