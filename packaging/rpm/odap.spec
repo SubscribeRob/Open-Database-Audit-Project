@@ -1,4 +1,4 @@
-#%define _topdir	 	/home/rob/source
+#%define _topdir	 	/home/rob/source/Open-Database-Audit-Project
 %define name		odap-client
 %define release		1
 %define version 	0.9
@@ -25,10 +25,9 @@ cd kernel/linux
 make
 
 %install
-cd client
+cd %{_topdir}/client
 make install prefix=$RPM_BUILD_ROOT/opt/odap
-cd ..
-cd kernel/linux
+cd %{_topdir}/kernel/linux
 make install prefix=$RPM_BUILD_ROOT
 
 %files
