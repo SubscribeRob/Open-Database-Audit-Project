@@ -95,7 +95,7 @@ class AuditCloudAccessManager: public AccessManager {
   Decision verify(const sockaddr_storage& sa, const char* data, int size) throw(){ return AccessManager::ALLOW; }
 };
 
-ConfigFile config( "config.ini" );
+ConfigFile * config;
 
 char* findBinPath(const char* argv)
 {
@@ -245,19 +245,19 @@ bool runConfig(char * bin_path){
 			  LOG4CXX_FATAL(logger,"Unable to register server. Username and or password is incorrect");
 			  return false;
 		  }
-		  config.add("server_id",config_message_return.server_id);
-		  config.add("token",config_message_return.token);
-		  config.add("type",server_software);
-		  config.add("port",server_port);
-		  config.add("strip_predicates",strip_predicates);
-		  config.add("server",config_message_return.server);
+		  config->add("server_id",config_message_return.server_id);
+		  config->add("token",config_message_return.token);
+		  config->add("type",server_software);
+		  config->add("port",server_port);
+		  config->add("strip_predicates",strip_predicates);
+		  config->add("server",config_message_return.server);
 		  token = config_message_return.token;
 		  server_id = config_message_return.server_id;
 
 
 	  //Now store the config file
 	  ofstream config_file;
-	  config_file.open ((bin_path + string("config.ini")).c_str());
+	  config_file.open ((bin_path + string("config->ini")).c_str());
 
 	  config_file <<config;
 	  config_file.close();
@@ -269,6 +269,11 @@ bool runConfig(char * bin_path){
 }
 int main(int argc, char **argv) {
 
+	if(argc == 3){
+		config = new ConfigFile( argc[2] );
+	}else{
+		config = new ConfigFile( "config.ini" );
+	}
 	setuid(0);
 	PropertyConfigurator::configure((findBinPath(argv[0]) + string("log4j.properties")).c_str());
 	LOG4CXX_DEBUG(logger,"Entering main()");
@@ -282,16 +287,16 @@ int main(int argc, char **argv) {
 
 	string remote_server;
 
-	config.readInto(remote_server, "server" , string("opendbaudit.com"));
-	config.readInto(server_id, "server_id" , -1);
-	config.readInto(strip_predicates, "strip_predicates" , false);
-	config.readInto(server_port, "port" , string("-1"));
+	config->readInto(remote_server, "server" , string("opendbaudit.com"));
+	config->readInto(server_id, "server_id" , -1);
+	config->readInto(strip_predicates, "strip_predicates" , false);
+	config->readInto(server_port, "port" , string("-1"));
 
-	config.readInto(kernel_module, "kernel_module" , string("/opt/odap/bin/trace.ko"));
-	config.readInto(kernel_module_name,"kernel_module_name",string("trace-exec"));
-	config.readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
-	config.readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
-	config.readInto(database_type,"type" , string("-1"));
+	config->readInto(kernel_module, "kernel_module" , string("/opt/odap/bin/odap_monitor.ko"));
+	config->readInto(kernel_module_name,"kernel_module_name",string("odap_monitor"));
+	config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
+	config->readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
+	config->readInto(database_type,"type" , string("-1"));
 
 
 	shared_ptr<TSocket> socket_config = factory->createSocket(remote_server,7912);
