@@ -1,4 +1,4 @@
-#%define _topdir	 	/home/rob/source/Open-Database-Audit-Project
+#%define _topdir	 	/home/rob/source
 %define name		odap-client
 %define release		1
 %define version 	0.9
@@ -18,16 +18,15 @@ URL:            http://www.opendbaudit.com
 Database Auditing Software
 
 %build
-cd client
+cd %{_topdir}/Open-Database-Audit-Project/client
 make
-cd ..
-cd kernel/linux
+cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
 make
 
 %install
-cd %{_topdir}/client
+cd %{_topdir}/Open-Database-Audit-Project/client
 make install prefix=$RPM_BUILD_ROOT/opt/odap
-cd %{_topdir}/kernel/linux
+cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
 make install prefix=$RPM_BUILD_ROOT
 
 %files
