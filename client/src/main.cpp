@@ -270,7 +270,7 @@ bool runConfig(char * bin_path){
 int main(int argc, char **argv) {
 
 	if(argc == 3){
-		config = new ConfigFile( argc[2] );
+		config = new ConfigFile( argv[2] );
 	}else{
 		config = new ConfigFile( "config.ini" );
 	}
