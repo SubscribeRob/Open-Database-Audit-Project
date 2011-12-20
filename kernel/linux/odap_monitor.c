@@ -55,7 +55,7 @@ static int  device_buffer_size = 0;			// Keep track of the end of the buffer
 							// or how much to send on read request
 
 
-static const char *NAME = "opendbaudit";		// The name for the /dev/ virtual device
+static const char *NAME = "odap";			// The name for the /dev/ virtual device
 static int MAJOR = 0;					// Stores the chardev id
 static int nreaders = 0;				// Keep track of the number of applications which have
 							// opened /dev/*NAME
