@@ -12,7 +12,7 @@ AC_PROG_CXX
 AC_PROG_LIBTOOL
 
 #Ensure boost is available
-BOOST_REQUIRE([1.48.0])
+#BOOST_REQUIRE([1.48.0])
 BOOST_THREADS([s])
 BOOST_REGEX([s])
 
@@ -37,7 +37,7 @@ AC_CHECK_HEADERS([arpa/inet.h fcntl.h netinet/in.h string.h sys/socket.h unistd.
 # Checks for typedefs, structures, and compiler characteristics.
 AC_HEADER_STDBOOL
 AC_C_INLINE
-AC_TYPE_SSIZE_T
+#AC_TYPE_SSIZE_T
 AC_TYPE_UID_T
 
 # Checks for library functions.
