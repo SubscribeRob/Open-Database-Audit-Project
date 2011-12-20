@@ -133,7 +133,7 @@ bool runConfig(char * bin_path){
 
 	  string username;
 	  do{
-		  cout << "Enter your DB Audit Cloud username:";
+		  cout << "Enter your ODAP username (Website username):";
 	  	  cin >> username;
 
 	  }while(username.size() < 1);
@@ -141,7 +141,7 @@ bool runConfig(char * bin_path){
 	  string password;
 
 	  do{
-		  cout << "Enter your DB Audit Cloud password:";
+		  cout << "Enter your ODAP password:";
 		  system("stty raw -echo");
 		  cin >> password;
 		  system("stty cooked echo");
@@ -262,7 +262,7 @@ bool runConfig(char * bin_path){
 	  config_file <<config;
 	  config_file.close();
 
-	  cout << "To start db auditing as root execute \"service dbauditcloud start\"" << endl;
+	  cout << "To start db auditing as root execute \"service odap start\"" << endl;
 
 	  LOG4CXX_DEBUG(logger,"Exiting runConfig()");
 	  return true;
@@ -282,12 +282,12 @@ int main(int argc, char **argv) {
 
 	string remote_server;
 
-	config.readInto(remote_server, "server" , string("dbauditcloud.com"));
+	config.readInto(remote_server, "server" , string("opendbaudit.com"));
 	config.readInto(server_id, "server_id" , -1);
 	config.readInto(strip_predicates, "strip_predicates" , false);
 	config.readInto(server_port, "port" , string("-1"));
 
-	config.readInto(kernel_module, "kernel_module" , string("/opt/dbauditcloud/bin/trace.ko"));
+	config.readInto(kernel_module, "kernel_module" , string("/opt/odap/bin/trace.ko"));
 	config.readInto(kernel_module_name,"kernel_module_name",string("trace-exec"));
 	config.readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
 	config.readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
@@ -350,7 +350,7 @@ int main(int argc, char **argv) {
 
 void devread(){
 
-	  int fd = open("/dev/dbauditcloud",  O_RDONLY);
+	  int fd = open("/dev/odap",  O_RDONLY);
 
 	  char buffer[1024*1024];	//allocate 64k buffer
 
