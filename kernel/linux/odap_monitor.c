@@ -168,7 +168,11 @@ static int my_msgrcv(int msqid, void* msgp, size_t msgsz, long msgtyp, int msgfl
 	int information_between_91_97 = 0;
 	char count_line[16];
 	struct timespec time;
-
+	#if LINUX_VERSION_CODE > 132633
+	int euid = current_euid();
+	#else
+	int euid = current->euid;
+	#endif
 
 	if(strcmp(current->comm,"db2bp") == 0){
 		if(msgsz > 118*16+17 && *(char*)(msgp+118*16+16) > 0){
@@ -187,23 +191,23 @@ static int my_msgrcv(int msqid, void* msgp, size_t msgsz, long msgtyp, int msgfl
 				time = current_kernel_time();
 				
 				if(*(char*)(msgp+118*16+16) == 0x04){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
 				}else if(*(char*)(msgp+118*16+16) == 0x05){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s user %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,"",(char*)(msgp+119*16+2),(char*)(msgp+121*16+8));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s user %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,"",(char*)(msgp+119*16+2),(char*)(msgp+121*16+8));
 				}else if(*(char*)(msgp+118*16+16) == 0x03){
 					//looks like static sql here .... cough cough.... someone implement......
 					
 				}else if(*(char*)(msgp+118*16+16) == 0x01){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:reorg table %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:reorg table %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
 				}else{
 					if(*(char*)(msgp+157*16+8) == 0x4c){
-						snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:backup database %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
+						snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:backup database %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
 					}else{
 						if(strlen((char*)(msgp+118*16+16)) <6 || *(char*)(msgp+118*16+16) < 0x20){
 							write_unlock(&curr_lock);
 							goto jprob_ret_msg;
 						}
-					  	snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:%s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
+					  	snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:%s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
 					}
 				  }
 				  snprintf(count_line,16,"%d:",(int)strlen(line_buff));
