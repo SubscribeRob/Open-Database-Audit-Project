@@ -65,9 +65,12 @@ static int mode = -1;					// Which database are we tracking
 
 DECLARE_WAIT_QUEUE_HEAD(wp);				// Block the reader 
 
+#if LINUX_VERSION_CODE > 132624
 rwlock_t curr_lock = __RW_LOCK_UNLOCKED(NAME);		// Lock for critical sections so different threads don't
 							// collide
-
+#else
+rwlock_t curr_lock = RW_LOCK_UNLOCKED;
+#endif
 static struct class * class_foo;
 static struct device * dev_foo;
 
@@ -508,7 +511,11 @@ int init_module(void)
 	if(IS_ERR(ptr_err = class_foo))
 		goto err2;
 
+#if LINUX_VERSION_CODE > 132624
 	dev_foo = device_create(class_foo,NULL,MKDEV(MAJOR,0),NULL,NAME);
+#else
+	dev_foo = class_device_create(class_foo,NULL,MKDEV(MAJOR,0),NULL,NAME);
+#endif
 	if(IS_ERR(ptr_err = dev_foo)){
 		goto err;
 	}
@@ -536,8 +543,11 @@ void cleanup_module(void)
 	}else if(mode == 0){
 		unregister_jprobe(&my_jprobe_stream_sendmsg);
 	}
-
+#if LINUX_VERSION_CODE > 132624
 	device_destroy(class_foo,MKDEV(MAJOR,0));
+#else
+	class_device_destroy(class_foo,MKDEV(MAJOR,0));
+#endif
 	class_destroy(class_foo);
 	unregister_chrdev(MAJOR,NAME);
 
