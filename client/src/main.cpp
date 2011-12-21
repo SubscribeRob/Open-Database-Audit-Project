@@ -134,7 +134,7 @@ bool runConfig(char * bin_path){
 	  string username;
 	  do{
 		  cout << "Enter your ODAP username (Website username):";
-	  	  cin >> username;
+	  	  getline(cin,username);
 
 	  }while(username.size() < 1);
 
@@ -153,7 +153,7 @@ bool runConfig(char * bin_path){
 
 	  while(true){
 		  cout << "Enter a server name for which you will use to reference this server in the UI:";
-	  	  cin >> server_name;
+	  	  getline(cin,server_name);
 	  	  if(server_name.size() < 1){
 	  		  cout << "Please enter a valid server name" << endl;
 	  		  continue;
@@ -166,7 +166,7 @@ bool runConfig(char * bin_path){
 		  string server_software;
 		  while(true){
 			  cout << "What server software do you want to audit? Enter 1 for MySQL, 2 for DB2, 3 for PostgreSQL, 4 for Oracle:";
-			  cin >> server_software;
+			  getline(cin,server_software);
 
 			  if(server_software.compare("1") == 0){
 				  server_software = "MySQL";
@@ -187,7 +187,7 @@ bool runConfig(char * bin_path){
 
 		  while(true){
 			  cout << "Would you like predicates stripped from SQL and not transmitted (Ex WHERE id = ? instead of WHERE id = 2): [y/n] ";
-		  	  cin >> strip_predicates;
+		  	  getline(cin,strip_predicates);
 
 		  	  if(strip_predicates.compare("y") != 0 && strip_predicates.compare("Y") != 0
 		  		&& strip_predicates.compare("n") != 0  && strip_predicates.compare("N") != 0){
@@ -199,7 +199,7 @@ bool runConfig(char * bin_path){
 
 		  while(true){
 			  cout << "What port does the server listen on (number only and enter 1 if it does not listen on TCP/IP)? ";
-		  	  cin >> server_port;
+		  	  getline(cin,server_port);
 		  	  if(atoi(server_port.c_str()) < 1){
 		  		  cout << "Enter a valid numeric port" << endl;
 		  	  }else{
@@ -212,7 +212,7 @@ bool runConfig(char * bin_path){
 
 		  while(true){
 			  cout << "Enter your GMT offset(Ex: -5 for EST or -3.5 for Newfoundland): ";
-		  	  cin >> timezone_offset;
+		  	  getline(cin,timezone_offset);
 
 		  	  if(atof(timezone_offset.c_str()) == 0.0 && timezone_offset.compare("0.0") != 0){
 		  		  cout << "Enter a valid numeric offset" << endl;
@@ -262,7 +262,7 @@ bool runConfig(char * bin_path){
 	  config_file <<config;
 	  config_file.close();
 
-	  cout << "To start db auditing as root execute \"service odap start\"" << endl;
+	  cout << "To start db auditing as root execute \"/sbin/service odap start\"" << endl;
 
 	  LOG4CXX_DEBUG(logger,"Exiting runConfig()");
 	  return true;
