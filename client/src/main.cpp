@@ -257,7 +257,7 @@ bool runConfig(char * bin_path){
 
 	  //Now store the config file
 	  ofstream config_file;
-	  config_file.open ((bin_path + string("config->ini")).c_str());
+	  config_file.open ((bin_path + string("config.ini")).c_str());
 
 	  config_file <<config;
 	  config_file.close();
