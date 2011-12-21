@@ -272,7 +272,7 @@ int main(int argc, char **argv) {
 	if(argc == 3){
 		config = new ConfigFile( argv[2] );
 	}else{
-		config = new ConfigFile( "config.ini" );
+		config = new ConfigFile( (findBinPath(argv[0]) + string("config.ini")).c_str() );
 	}
 	setuid(0);
 	PropertyConfigurator::configure((findBinPath(argv[0]) + string("log4j.properties")).c_str());
