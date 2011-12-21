@@ -297,7 +297,7 @@ int main(int argc, char **argv) {
 	config->readInto(strip_predicates, "strip_predicates" , false);
 	config->readInto(server_port, "port" , string("-1"));
 
-	config->readInto(kernel_module, "kernel_module" , string("/opt/odap/bin/odap_monitor.ko"));
+	config->readInto(kernel_module, "kernel_module" , string("/opt/odap/kernel/odap_monitor.ko"));
 	config->readInto(kernel_module_name,"kernel_module_name",string("odap_monitor"));
 	config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
 	config->readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
@@ -330,8 +330,12 @@ int main(int argc, char **argv) {
 		  }
 
 		  LOG4CXX_DEBUG(logger,"insmod:" << (insmod_cmd +  " " + kernel_module+ " mode=" + type).c_str());
-		  system((insmod_cmd + " " + kernel_module+ " mode=" + type).c_str());
+		  int ret = system((insmod_cmd + " " + kernel_module+ " mode=" + type).c_str());
 
+		  if(WEXITSTATUS(ret) != 0){
+			LOG4CXX_ERROR(logger,"Error: unable to load monitoring module");
+                	return 1;
+		  }
 		  signal(SIGTERM,terminate);
 		  signal(SIGINT,terminate);
 		  signal(SIGSEGV,terminate);
