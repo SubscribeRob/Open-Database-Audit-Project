@@ -269,13 +269,18 @@ bool runConfig(char * bin_path){
 }
 int main(int argc, char **argv) {
 
+	PropertyConfigurator::configure((findBinPath(argv[0]) + string("log4j.properties")).c_str());
+	if(geteuid() != 0){
+		LOG4CXX_ERROR(logger,"Error: you must be root to run this application");
+		return 1;
+	}
+
 	if(argc == 3){
 		config = new ConfigFile( argv[2] );
 	}else{
 		config = new ConfigFile( (findBinPath(argv[0]) + string("config.ini")).c_str() );
 	}
 	setuid(0);
-	PropertyConfigurator::configure((findBinPath(argv[0]) + string("log4j.properties")).c_str());
 	LOG4CXX_DEBUG(logger,"Entering main()");
 
 	shared_ptr<TSSLSocketFactory> factory(new TSSLSocketFactory());
