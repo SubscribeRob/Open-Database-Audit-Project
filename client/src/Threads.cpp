@@ -28,7 +28,7 @@ using namespace log4cxx;
 using namespace log4cxx::helpers;
 EventQueue event_queue;
 LoggerPtr  thread_logger(Logger::getLogger("com.opendbaudit.threads"));
-
+extern bool shutdown_now;
 
 void sendMessageThread()
 {
@@ -38,5 +38,9 @@ void sendMessageThread()
 		LOG4CXX_DEBUG(thread_logger,"Wakeup send message");
 		event_queue.sendMessage();
 		boost::this_thread::sleep(workTime);
+		if(shutdown_now){
+			LOG4CXX_DEBUG(thread_logger,"Shutting down send message thread");
+			break;
+		}
 	}
 }

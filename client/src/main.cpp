@@ -86,6 +86,10 @@ string database_type;
 string server_port;
 
 using namespace boost;
+shared_ptr<boost::thread> SendMessageThread;
+shared_ptr<boost::thread> KernelThread;
+shared_ptr<boost::thread> TCPThread;
+bool shutdown_now = false;
 
 class AuditCloudAccessManager: public AccessManager {
  public:
@@ -121,8 +125,10 @@ char* findBinPath(const char* argv)
 
 void terminate(int param){
 	LOG4CXX_DEBUG(logger,"Terminating program");
-	  LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
-	  system((rmmod_cmd + " " + kernel_module_name).c_str());
+	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
+	system((rmmod_cmd + " " + kernel_module_name).c_str());
+	shutdown_now = true;
+	SendMessageThread->interrupt();
 	exit (0);
 
 }
@@ -340,13 +346,13 @@ int main(int argc, char **argv) {
 	client_store = new AuditEventClient(protocol);
 	transport->open();
 
-	boost::thread SendMessageThread(sendMessageThread);
-	boost::thread KernelThread(devread);
-	boost::thread TCPThread(tcpcap);
+	SendMessageThread.reset(new boost::thread(sendMessageThread));
+	KernelThread.reset(new boost::thread(devread));
+	TCPThread.reset(new boost::thread(tcpcap));
 
-	TCPThread.join();
-	KernelThread.join();
-	SendMessageThread.join();
+	TCPThread->join();
+	KernelThread->join();
+	SendMessageThread->join();
 	transport->close();
 
   LOG4CXX_DEBUG(logger,"Exiting main()");
