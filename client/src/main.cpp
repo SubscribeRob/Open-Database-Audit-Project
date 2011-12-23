@@ -128,6 +128,7 @@ void terminate(int param){
 	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
 	system((rmmod_cmd + " " + kernel_module_name).c_str());
 	shutdown_now = true;
+	LOG4CXX_DEBUG(logger,"Shutdown now = true");
 	SendMessageThread->interrupt();
 	exit (0);
 

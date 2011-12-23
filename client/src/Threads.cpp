@@ -35,7 +35,7 @@ void sendMessageThread()
 	LOG4CXX_DEBUG(thread_logger,"In sendMessageThread");
 	while(true){
 		boost::posix_time::seconds workTime(5);
-		LOG4CXX_DEBUG(thread_logger,"Wakeup send message");
+		LOG4CXX_DEBUG(thread_logger,"Wakeup send message:" << shutdown_now);
 		event_queue.sendMessage();
 		boost::this_thread::sleep(workTime);
 		if(shutdown_now){
