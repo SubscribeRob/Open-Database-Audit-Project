@@ -65,9 +65,12 @@ static int mode = -1;					// Which database are we tracking
 
 DECLARE_WAIT_QUEUE_HEAD(wp);				// Block the reader 
 
+#if LINUX_VERSION_CODE > 132624
 rwlock_t curr_lock = __RW_LOCK_UNLOCKED(NAME);		// Lock for critical sections so different threads don't
 							// collide
-
+#else
+rwlock_t curr_lock = RW_LOCK_UNLOCKED;
+#endif
 static struct class * class_foo;
 static struct device * dev_foo;
 
@@ -168,7 +171,11 @@ static int my_msgrcv(int msqid, void* msgp, size_t msgsz, long msgtyp, int msgfl
 	int information_between_91_97 = 0;
 	char count_line[16];
 	struct timespec time;
-
+	#if LINUX_VERSION_CODE > 132633
+	int euid = current_euid();
+	#else
+	int euid = current->euid;
+	#endif
 
 	if(strcmp(current->comm,"db2bp") == 0){
 		if(msgsz > 118*16+17 && *(char*)(msgp+118*16+16) > 0){
@@ -187,23 +194,23 @@ static int my_msgrcv(int msqid, void* msgp, size_t msgsz, long msgtyp, int msgfl
 				time = current_kernel_time();
 				
 				if(*(char*)(msgp+118*16+16) == 0x04){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
 				}else if(*(char*)(msgp+118*16+16) == 0x05){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s user %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,"",(char*)(msgp+119*16+2),(char*)(msgp+121*16+8));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:connect to %s user %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,"",(char*)(msgp+119*16+2),(char*)(msgp+121*16+8));
 				}else if(*(char*)(msgp+118*16+16) == 0x03){
 					//looks like static sql here .... cough cough.... someone implement......
 					
 				}else if(*(char*)(msgp+118*16+16) == 0x01){
-					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:reorg table %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
+					snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:reorg table %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+119*16+2));
 				}else{
 					if(*(char*)(msgp+157*16+8) == 0x4c){
-						snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:backup database %s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
+						snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:backup database %s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
 					}else{
 						if(strlen((char*)(msgp+118*16+16)) <6 || *(char*)(msgp+118*16+16) < 0x20){
 							write_unlock(&curr_lock);
 							goto jprob_ret_msg;
 						}
-					  	snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:%s\n",current->pid,current_euid(),time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
+					  	snprintf(line_buff,1024*256,"%d:%d:%lu:%lu:%s:%s\n",current->pid,euid,time.tv_sec,time.tv_nsec,(char*)(msgp+99*16+16),(char*)(msgp+118*16+16));
 					}
 				  }
 				  snprintf(count_line,16,"%d:",(int)strlen(line_buff));
@@ -504,7 +511,11 @@ int init_module(void)
 	if(IS_ERR(ptr_err = class_foo))
 		goto err2;
 
+#if LINUX_VERSION_CODE > 132624
 	dev_foo = device_create(class_foo,NULL,MKDEV(MAJOR,0),NULL,NAME);
+#else
+	dev_foo = class_device_create(class_foo,NULL,MKDEV(MAJOR,0),NULL,NAME);
+#endif
 	if(IS_ERR(ptr_err = dev_foo)){
 		goto err;
 	}
@@ -532,8 +543,11 @@ void cleanup_module(void)
 	}else if(mode == 0){
 		unregister_jprobe(&my_jprobe_stream_sendmsg);
 	}
-
+#if LINUX_VERSION_CODE > 132624
 	device_destroy(class_foo,MKDEV(MAJOR,0));
+#else
+	class_device_destroy(class_foo,MKDEV(MAJOR,0));
+#endif
 	class_destroy(class_foo);
 	unregister_chrdev(MAJOR,NAME);
 

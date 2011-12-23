@@ -18,17 +18,15 @@ URL:            http://www.opendbaudit.com
 Database Auditing Software
 
 %build
-cd client
+cd %{_topdir}/Open-Database-Audit-Project/client
 make
-cd ..
-cd kernel/linux
+cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
 make
 
 %install
-cd client
+cd %{_topdir}/Open-Database-Audit-Project/client
 make install prefix=$RPM_BUILD_ROOT/opt/odap
-cd ..
-cd kernel/linux
+cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
 make install prefix=$RPM_BUILD_ROOT
 
 %files
