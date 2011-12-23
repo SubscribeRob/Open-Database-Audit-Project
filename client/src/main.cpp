@@ -34,11 +34,14 @@
 #include <netinet/tcp.h>
 #include "include/charsets.h"
 #include <sys/socket.h>
+#include <sys/time.h>
+#include <sys/types.h>
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <ctime>
 #include <sstream>
 #include <list>
+#include <errno.h>
 #include "CachedUserManager.h"
 #include "ConfigFile.h"
 #include "protocol/Config.h"
@@ -125,13 +128,15 @@ char* findBinPath(const char* argv)
 
 void terminate(int param){
 	LOG4CXX_DEBUG(logger,"Terminating program");
-	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
-	system((rmmod_cmd + " " + kernel_module_name).c_str());
 	shutdown_now = true;
 	LOG4CXX_DEBUG(logger,"Shutdown now = true");
 	SendMessageThread->interrupt();
-	exit (0);
-
+	TCPThread->interrupt();
+	KernelThread->interrupt();
+	KernelThread->join();
+	SendMessageThread->join();
+	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
+	system((rmmod_cmd + " " + kernel_module_name).c_str());
 }
 
 bool runConfig(char * bin_path){
@@ -372,7 +377,7 @@ int main(int argc, char **argv) {
 void devread(){
 
 	  int fd = open("/dev/odap",  O_RDONLY);
-
+	  fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
 	  char buffer[1024*1024];	//allocate 64k buffer
 
 	  MySQLConnection mysql;
@@ -380,16 +385,31 @@ void devread(){
 	  ssize_t total_read;
 
 	  int type = 0;
-
+	
 	  if(strcmp("DB2",database_type.c_str()) == 0){
 		  type = 1;
 	  }
 
 	  LOG4CXX_DEBUG(logger,"Parsing type" << type);
-	  while((total_read = read(fd,buffer,1024*256)) != 0){
+	  while(true){
+	  	if(shutdown_now){
+			break;
+          	}
+
+	  	  total_read = read(fd,buffer,1024*256); 
+
 		  if(total_read < 1){
-			  LOG4CXX_ERROR(logger,"Read returned -1");
-			  return;
+			if(errno == EAGAIN){
+				try{
+			 		boost::posix_time::milliseconds workTime(100);
+					boost::this_thread::sleep(workTime);
+				}    catch(boost::thread_interrupted const& )
+    				{
+				}
+				continue;
+			}
+			 LOG4CXX_ERROR(logger,"Read returned an error" << errno);
+			 break;
 		  }
 
 		  LOG4CXX_DEBUG(logger,"Line to process" << buffer);
@@ -399,8 +419,10 @@ void devread(){
 			  db2.parse_format_2(&buffer[0],total_read);
 		  }
 
-	  }
-	  close(fd);
+	}
+	LOG4CXX_ERROR(logger,"Closing dev fd");
+	 close(fd);
+		LOG4CXX_ERROR(logger,"Closing dev fd2");
 
 }
 
@@ -453,11 +475,12 @@ int tcpcap() {
 
   DB2Connection db2;
   MySQLConnection mysql;
-
+  pcap_setnonblock(handle, 1, errbuf);
   while((res = pcap_next_ex( handle, &header, &pkt_data)) >= 0){
 
       if(res == 0)
-          /* Timeout elapsed */
+          boost::this_thread::sleep(boost::posix_time::milliseconds(100));
+
           continue;
       	  //
 

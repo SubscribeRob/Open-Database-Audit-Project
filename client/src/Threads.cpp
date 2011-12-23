@@ -23,7 +23,9 @@
 #include "log4cxx/logger.h"
 #include "log4cxx/basicconfigurator.h"
 #include "log4cxx/helpers/exception.h"
+#include <iostream>
 
+using namespace std;
 using namespace log4cxx;
 using namespace log4cxx::helpers;
 EventQueue event_queue;
@@ -33,9 +35,9 @@ extern bool shutdown_now;
 void sendMessageThread()
 {
 	LOG4CXX_DEBUG(thread_logger,"In sendMessageThread");
+	try{
 	while(true){
-		boost::posix_time::seconds workTime(5);
-		LOG4CXX_DEBUG(thread_logger,"Wakeup send message:" << shutdown_now);
+		boost::posix_time::seconds workTime(2);
 		event_queue.sendMessage();
 		boost::this_thread::sleep(workTime);
 		if(shutdown_now){
@@ -43,4 +45,7 @@ void sendMessageThread()
 			break;
 		}
 	}
+	}catch(boost::thread_interrupted const& ){
+	}
+		event_queue.sendMessage();
 }
