@@ -43,18 +43,10 @@ odapservice() {
     start)
       check_for_root
       start
-if [ -f "/etc/SuSE-release" ]; then
-      	rc_status -v
-fi
-
-
       ;;
     stop)
       check_for_root
       stop
-if [ -f "/etc/SuSE-release" ]; then
-      rc_status -v
-fi
       ;;
     *)
         echo $"Usage: $0 {start|stop}"
