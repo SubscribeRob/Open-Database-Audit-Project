@@ -291,10 +291,48 @@ int main(int argc, char **argv) {
 
 	if(argc == 3){
 		config = new ConfigFile( argv[2] );
+	}else if(argc == 2){
+		config = new ConfigFile();
 	}else{
 		config = new ConfigFile( (findBinPath(argv[0]) + string("config.ini")).c_str() );
 	}
 	setuid(0);
+
+        string remote_server;
+
+        config->readInto(remote_server, "server" , string("opendbaudit.com"));
+        config->readInto(server_id, "server_id" , -1);
+        config->readInto(strip_predicates, "strip_predicates" , false);
+        config->readInto(server_port, "port" , string("-1"));
+
+        config->readInto(kernel_module, "kernel_module" , string("/opt/odap/kernel/odap_monitor.ko"));
+        config->readInto(kernel_module_name,"kernel_module_name",string("odap_monitor"));
+        config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
+        config->readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
+        config->readInto(database_type,"type" , string("-1"));
+
+        shared_ptr<TSSLSocketFactory> factory(new TSSLSocketFactory());
+        factory->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
+        factory->loadTrustedCertificates((findBinPath(argv[0]) + string("certificate.pem")).c_str());
+        factory->authenticate(true);
+        shared_ptr<AccessManager> am (new AuditCloudAccessManager);
+        factory->access(am);
+
+        shared_ptr<TSocket> socket_config = factory->createSocket(remote_server,7912);
+        boost::shared_ptr<TTransport> transport_config(new TBufferedTransport(socket_config));
+
+        boost::shared_ptr<TProtocol> protocol_config(new TBinaryProtocol(transport_config));
+        config_client = new ConfigClient(protocol_config);
+
+        transport_config->open();
+        if(argc == 2 || server_id == -1){
+                runConfig(findBinPath(argv[0]));
+                transport_config->close();
+                return 0;
+        }
+
+
+        transport_config->close();
 
 	int daemonize;
 	pid_t pid, sid;
@@ -333,44 +371,6 @@ int main(int argc, char **argv) {
 	pid_file.close();
 	LOG4CXX_DEBUG(logger,"Entering main()");
 
-	shared_ptr<TSSLSocketFactory> factory(new TSSLSocketFactory());
-	factory->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-	factory->loadTrustedCertificates((findBinPath(argv[0]) + string("certificate.pem")).c_str());
-	factory->authenticate(true);
-	shared_ptr<AccessManager> am (new AuditCloudAccessManager);
-	factory->access(am);
-
-	string remote_server;
-
-	config->readInto(remote_server, "server" , string("opendbaudit.com"));
-	config->readInto(server_id, "server_id" , -1);
-	config->readInto(strip_predicates, "strip_predicates" , false);
-	config->readInto(server_port, "port" , string("-1"));
-
-	config->readInto(kernel_module, "kernel_module" , string("/opt/odap/kernel/odap_monitor.ko"));
-	config->readInto(kernel_module_name,"kernel_module_name",string("odap_monitor"));
-	config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
-	config->readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
-	config->readInto(database_type,"type" , string("-1"));
-
-
-	shared_ptr<TSocket> socket_config = factory->createSocket(remote_server,7912);
-	boost::shared_ptr<TTransport> transport_config(new TBufferedTransport(socket_config));
-
-	boost::shared_ptr<TProtocol> protocol_config(new TBinaryProtocol(transport_config));
-	config_client = new ConfigClient(protocol_config);
-
-	transport_config->open();
-	if(argc == 2 || server_id == -1){
-		runConfig(findBinPath(argv[0]));
-		transport_config->close();
-		return 0;
-	}else{
-		// Load config from server
-	}
-
-
-	transport_config->close();
 
 	{
 		  string type = "0";
