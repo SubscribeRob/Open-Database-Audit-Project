@@ -5,18 +5,27 @@ CONF_FILE="/opt/odap/bin/config.ini"
 . /lib/lsb/init-functions
 
 start() {
-  echo -n $"Starting odap service: "
         if [ ! -f $CONF_FILE ]; then
-             echo "You must un /opt/odap/bin/odap -config first"
+             echo "You must run /opt/odap/bin/odap -config first"
              exit -1
 	fi
+  start-stop-daemon --start --q --pidfile $PIDFILE --exec /opt/odap/bin/odap	
+  if [ "$?" -eq "0" ]; then
+	 echo -e "Starting odap service \033[32m ok\033[0m"
+  else
+	echo -e "Starting odap service \033[31m failed\033[0m"
+  fi 
 
-  start-stop-daemon --start --q --pidfile $PIDFILE --exec /opt/odap/bin/odap	|| return 2
 }
 
 stop(){
   echo -n $"Stopping odap service: "
-  start-stop-daemon --stop --q --pidfile $PIDFILE || return 2
+  start-stop-daemon --stop --q --pidfile $PIDFILE 
+  if [ "$?" -eq "0" ]; then
+         echo -e "Stopping odap service \033[32m ok\033[0m"
+  else
+        echo -e "Stopping odap service \033[31m failed\033[0m"
+  fi
   rm -f $PIDFILE
 }
 
@@ -35,8 +44,10 @@ odapservice() {
       check_for_root
       start
 if [ -f "/etc/SuSE-release" ]; then
-      rc_status -v
+      	rc_status -v
 fi
+
+
       ;;
     stop)
       check_for_root
