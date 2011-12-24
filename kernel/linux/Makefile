@@ -14,4 +14,3 @@ install:
 	/usr/bin/install -c ../../config/linux/odap $(prefix)/etc/init.d/
 	/usr/bin/install -c ../../config/certificate.pem $(prefix)/opt/odap/bin/
 	/usr/bin/install -c ../../config/log4j.properties $(prefix)/opt/odap/bin/	
-	/usr/bin/install -c ../../config/config.ini $(prefix)/opt/odap/bin/
