@@ -29,6 +29,10 @@ make install prefix=$RPM_BUILD_ROOT/opt/odap
 cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
 make install prefix=$RPM_BUILD_ROOT
 
+%preun
+rm -rf /opt/odap
+rm -f /etc/init.d/odap
+
 %files
 %defattr(-,root,root)
 /opt/odap/bin/odap
