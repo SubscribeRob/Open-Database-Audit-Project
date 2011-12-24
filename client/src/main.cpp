@@ -104,6 +104,7 @@ class AuditCloudAccessManager: public AccessManager {
 
 ConfigFile * config;
 
+string pid_file;
 char* findBinPath(const char* argv)
 {
 	static char path[300];
@@ -137,6 +138,7 @@ void terminate(int param){
 	SendMessageThread->join();
 	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
 	system((rmmod_cmd + " " + kernel_module_name).c_str());
+	remove(pid_file.c_str());
 }
 
 bool runConfig(char * bin_path){
@@ -293,6 +295,42 @@ int main(int argc, char **argv) {
 		config = new ConfigFile( (findBinPath(argv[0]) + string("config.ini")).c_str() );
 	}
 	setuid(0);
+
+	int daemonize;
+	pid_t pid, sid;
+
+	config->readInto(daemonize,"daemonize",1);
+	if(daemonize){
+        	/* Fork off the parent process */
+        	pid = fork();
+        	if (pid < 0) {
+            	exit(EXIT_FAILURE);
+        	}
+        	/* If we got a good PID, then
+           	we can exit the parent process. */
+        	if (pid > 0) {
+           	 exit(EXIT_SUCCESS);
+        	}
+ 
+        	/* Change the file mode mask */
+        	umask(0);
+ 
+        	/* Create a new SID for the child process */
+        	sid = setsid();
+        	if (sid < 0) {
+           	 /* Log the failure */
+            	exit(EXIT_FAILURE);
+        	}
+        	/* Close out the standard file descriptors */
+        	close(STDIN_FILENO);
+        	close(STDOUT_FILENO);
+        	close(STDERR_FILENO);
+	}
+
+	ofstream pid_file;
+	pid_file.open((findBinPath(argv[0]) + string("odap.pid")).c_str());
+	pid_file << getpid();
+	pid_file.close();
 	LOG4CXX_DEBUG(logger,"Entering main()");
 
 	shared_ptr<TSSLSocketFactory> factory(new TSSLSocketFactory());

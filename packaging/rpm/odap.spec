@@ -37,4 +37,3 @@ make install prefix=$RPM_BUILD_ROOT
 /opt/odap/bin/log4j.properties
 /opt/odap/kernel/odap_monitor.ko
 /etc/init.d/odap
-/opt/odap/bin/odap-daemon

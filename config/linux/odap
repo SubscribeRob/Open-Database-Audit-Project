@@ -1,36 +1,23 @@
 #/bin/bash
 #
-
-source /etc/rc.d/init.d/functions
-
-PIDFILE="/var/run/odap.pid"
-LOCKFILE="/var/lock/subsys/odap"
-RETVAL_SUCCESS=0
+PIDFILE="/opt/odap/bin/odap.pid"
+CONF_FILE="/opt/odap/bin/config.ini"
+. /lib/lsb/init-functions
 
 start() {
   echo -n $"Starting odap service: "
-  daemon /opt/odap/bin/odap-daemon start
-  RETVAL=$?
-  [ $RETVAL -eq $RETVAL_SUCCESS ] && touch $LOCKFILE
-  return $RETVAL
+        if [ ! -f $CONF_FILE ]; then
+             echo "You must un /opt/odap/bin/odap -config first"
+             exit -1
+	fi
 
+  start-stop-daemon --start --q --pidfile $PIDFILE --exec /opt/odap/bin/odap	|| return 2
 }
 
 stop(){
   echo -n $"Stopping odap service: "
-  daemon /opt/odap/bin/odap-daemon stop
-  RETVAL=$?
-  [ $RETVAL -eq $RETVAL_SUCCESS ] && rm -f $LOCKFILE $PIDFILE
-  return $RETVAL
-}
-
-checkstatus(){
-  status -p $PIDFILE
-  RETVAL=$?
-}
-
-condrestart(){
-  [ -e $LOCKFILE ] && restart || :
+  start-stop-daemon --stop --q --pidfile $PIDFILE || return 2
+  rm -f $PIDFILE
 }
 
 check_for_root() {
@@ -47,24 +34,19 @@ odapservice() {
     start)
       check_for_root
       start
+if [ -f "/etc/SuSE-release" ]; then
+      rc_status -v
+fi
       ;;
     stop)
       check_for_root
       stop
-      ;;
-    status)
-      checkstatus
-      ;;
-    restart)
-      check_for_root
-      restart
-      ;;
-    condrestart|try-restart)
-      check_for_root
-      condrestart
+if [ -f "/etc/SuSE-release" ]; then
+      rc_status -v
+fi
       ;;
     *)
-        echo $"Usage: $0 {start|stop|status|restart|condrestart|try-restart}"
+        echo $"Usage: $0 {start|stop}"
         exit 1
   esac
 }
