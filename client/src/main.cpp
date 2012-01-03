@@ -277,7 +277,7 @@ bool runConfig(char * bin_path){
 	  config_file << *config;
 	  config_file.close();
 
-	  cout << "To start db auditing as root execute \"/sbin/service odap start\"" << endl;
+	  cout << "To start db auditing as root execute \"service odap start\" or \"/sbin/service odap start\" depending on your distribution" << endl;
 
 	  LOG4CXX_DEBUG(logger,"Exiting runConfig()");
 	  return true;
@@ -335,6 +335,27 @@ int main(int argc, char **argv) {
 
         transport_config->close();
 
+
+    	{
+    		  string type = "0";
+
+    		  if(strcmp("DB2",database_type.c_str()) == 0){
+    			  type = "1";
+    		  }
+
+    		  LOG4CXX_DEBUG(logger,"insmod:" << (insmod_cmd +  " " + kernel_module+ " mode=" + type).c_str());
+    		  int ret = system((insmod_cmd + " " + kernel_module+ " mode=" + type).c_str());
+
+    		  if(WEXITSTATUS(ret) != 0){
+    			LOG4CXX_ERROR(logger,"Error: unable to load monitoring module");
+                    	return 1;
+    		  }
+    		  signal(SIGTERM,terminate);
+    		  signal(SIGINT,terminate);
+    		  signal(SIGSEGV,terminate);
+    		  signal(SIGILL,terminate);
+    	}
+
 	int daemonize;
 	pid_t pid, sid;
 
@@ -373,25 +394,7 @@ int main(int argc, char **argv) {
 	LOG4CXX_DEBUG(logger,"Entering main()");
 
 
-	{
-		  string type = "0";
 
-		  if(strcmp("DB2",database_type.c_str()) == 0){
-			  type = "1";
-		  }
-
-		  LOG4CXX_DEBUG(logger,"insmod:" << (insmod_cmd +  " " + kernel_module+ " mode=" + type).c_str());
-		  int ret = system((insmod_cmd + " " + kernel_module+ " mode=" + type).c_str());
-
-		  if(WEXITSTATUS(ret) != 0){
-			LOG4CXX_ERROR(logger,"Error: unable to load monitoring module");
-                	return 1;
-		  }
-		  signal(SIGTERM,terminate);
-		  signal(SIGINT,terminate);
-		  signal(SIGSEGV,terminate);
-		  signal(SIGILL,terminate);
-	}
 
 
 	shared_ptr<TSocket> socket = factory->createSocket(remote_server,7911);
