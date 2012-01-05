@@ -74,6 +74,7 @@ void devread();
 int server_id = -1;
 std::string token = "ABCDEFG";
 bool strip_predicates = false;
+bool capture_local = false;
 
 AuditEventClient * client_store = NULL;
 ConfigClient * config_client = NULL;
@@ -88,7 +89,6 @@ string insmod_cmd;
 string rmmod_cmd;
 string database_type;
 string server_port;
-
 using namespace boost;
 shared_ptr<boost::thread> SendMessageThread;
 shared_ptr<boost::thread> KernelThread;
@@ -105,7 +105,7 @@ class AuditCloudAccessManager: public AccessManager {
 
 ConfigFile * config;
 
-string pid_file;
+string pid_file_name;
 char* findBinPath(const char* argv)
 {
 	static char path[300];
@@ -134,12 +134,16 @@ void terminate(int param){
 	LOG4CXX_DEBUG(logger,"Shutdown now = true");
 	SendMessageThread->interrupt();
 	TCPThread->interrupt();
-	KernelThread->interrupt();
-	KernelThread->join();
+	if(capture_local){
+		KernelThread->interrupt();
+		KernelThread->join();
+	}
 	SendMessageThread->join();
-	LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
-	system((rmmod_cmd + " " + kernel_module_name).c_str());
-	remove(pid_file.c_str());
+	if(capture_local){
+		LOG4CXX_DEBUG(logger,"Unload module:" << (rmmod_cmd +  " " + kernel_module_name).c_str());
+		system((rmmod_cmd + " " + kernel_module_name).c_str());
+	}
+	remove(pid_file_name.c_str());
 }
 
 bool runConfig(char * bin_path){
@@ -212,6 +216,27 @@ bool runConfig(char * bin_path){
 		  	  }
 		  }
 
+
+		  string capture_local_str;
+		  while(true){
+			cout << "Do you want to capture all local server statements (requires odap-monitor package to be installed): [y/n] ";
+			  getline(cin,capture_local_str);
+
+                          if(capture_local_str.compare("y") != 0 
+                                && capture_local_str.compare("n") != 0 ){
+                                  cout << "Enter either y or n" << endl;
+                          }else{
+                                  break;
+                          }
+		  }
+
+		  if(capture_local_str.compare("y") == 0){
+			capture_local = true;
+		  }else{
+			capture_local = false;
+		  }
+		
+
 		  while(true){
 			  cout << "What port does the server listen on (number only and enter 1 if it does not listen on TCP/IP)? ";
 		  	  getline(cin,server_port);
@@ -266,13 +291,14 @@ bool runConfig(char * bin_path){
 		  config->add("port",server_port);
 		  config->add("strip_predicates",strip_predicates);
 		  config->add("server",config_message_return.server);
+		  config->add("capture_local",capture_local);
 		  token = config_message_return.token;
 		  server_id = config_message_return.server_id;
 
 
 	  //Now store the config file
 	  ofstream config_file;
-	  config_file.open ((bin_path + string("config.ini")).c_str());
+	  config_file.open ((bin_path + string("/config.ini")).c_str());
 
 	  config_file << *config;
 	  config_file.close();
@@ -284,7 +310,7 @@ bool runConfig(char * bin_path){
 }
 int main(int argc, char **argv) {
 
-	PropertyConfigurator::configure((findBinPath(argv[0]) + string("log4j.properties")).c_str());
+	PropertyConfigurator::configure((SYSCONFDIR + string("/log4j.properties")).c_str());
 	if(geteuid() != 0){
 		LOG4CXX_ERROR(logger,"Error: you must be root to run this application");
 		return 1;
@@ -295,7 +321,7 @@ int main(int argc, char **argv) {
 	}else if(argc == 2){
 		config = new ConfigFile();
 	}else{
-		config = new ConfigFile( (findBinPath(argv[0]) + string("config.ini")).c_str() );
+		config = new ConfigFile( (SYSCONFDIR + string("/config.ini")).c_str() );
 	}
 	setuid(0);
 
@@ -304,17 +330,18 @@ int main(int argc, char **argv) {
         config->readInto(remote_server, "server" , string("opendbaudit.com"));
         config->readInto(server_id, "server_id" , -1);
         config->readInto(strip_predicates, "strip_predicates" , false);
+	config->readInto(capture_local,"capture_local",false);
         config->readInto(server_port, "port" , string("-1"));
 
-        config->readInto(kernel_module, "kernel_module" , string("/opt/odap/kernel/odap_monitor.ko"));
+        config->readInto(kernel_module, "kernel_module" , string("odap_monitor"));
         config->readInto(kernel_module_name,"kernel_module_name",string("odap_monitor"));
-        config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/insmod"));
+        config->readInto(insmod_cmd, "insmod_cmd" , string("/sbin/modprobe"));
         config->readInto(rmmod_cmd, "rmmod_cmd" , string("/sbin/rmmod"));
         config->readInto(database_type,"type" , string("-1"));
 
         shared_ptr<TSSLSocketFactory> factory(new TSSLSocketFactory());
         factory->ciphers("ALL:!ADH:!LOW:!EXP:!MD5:@STRENGTH");
-        factory->loadTrustedCertificates((findBinPath(argv[0]) + string("certificate.pem")).c_str());
+        factory->loadTrustedCertificates((SYSCONFDIR + string("/certificate.pem")).c_str());
         factory->authenticate(true);
         shared_ptr<AccessManager> am (new AuditCloudAccessManager);
         factory->access(am);
@@ -327,7 +354,7 @@ int main(int argc, char **argv) {
 
         transport_config->open();
         if(argc == 2 || server_id == -1){
-                runConfig(findBinPath(argv[0]));
+                runConfig(SYSCONFDIR);
                 transport_config->close();
                 return 0;
         }
@@ -336,7 +363,7 @@ int main(int argc, char **argv) {
         transport_config->close();
 
 
-    	{
+    	if(capture_local){
     		  string type = "0";
 
     		  if(strcmp("DB2",database_type.c_str()) == 0){
@@ -388,7 +415,8 @@ int main(int argc, char **argv) {
 	}
 
 	ofstream pid_file;
-	pid_file.open((findBinPath(argv[0]) + string("odap.pid")).c_str());
+	pid_file_name = "/var/run/odap.pid";
+	pid_file.open(("/var/run/" + string("odap.pid")).c_str());
 	pid_file << getpid();
 	pid_file.close();
 	LOG4CXX_DEBUG(logger,"Entering main()");

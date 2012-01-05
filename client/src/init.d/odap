@@ -1,0 +1,59 @@
+#/bin/bash
+#
+PIDFILE="/var/run/odap.pid"
+CONF_FILE="/etc/odap/config.ini"
+. /lib/lsb/init-functions
+
+start() {
+        if [ ! -f $CONF_FILE ]; then
+             echo "You must first run as root \"odap -config\""
+             exit 2 
+	fi
+  start-stop-daemon --start --q --pidfile $PIDFILE --exec /usr/bin/odap	
+  if [ "$?" -eq "0" ]; then
+	 echo -e "Starting odap service \033[32m ok\033[0m"
+  else
+	echo -e "Starting odap service \033[31m failed\033[0m"
+  fi 
+
+}
+
+stop(){
+  echo -n $"Stopping odap service: "
+  start-stop-daemon --stop --q --pidfile $PIDFILE 
+  if [ "$?" -eq "0" ]; then
+         echo -e "Stopping odap service \033[32m ok\033[0m"
+  else
+        echo -e "Stopping odap service \033[31m failed\033[0m"
+  fi
+  rm -f $PIDFILE
+}
+
+check_for_root() {
+  if [ $(id -ur) -ne 0 ]; then
+    echo 'Error: root user is required'
+    echo
+     exit 1
+  fi
+}
+
+
+odapservice() {
+  case "$1" in
+    start)
+      check_for_root
+      start
+      ;;
+    stop)
+      check_for_root
+      stop
+      ;;
+    *)
+        echo $"Usage: $0 {start|stop}"
+        exit 1
+  esac
+}
+
+odapservice "$1"
+
+exit $RETVAL

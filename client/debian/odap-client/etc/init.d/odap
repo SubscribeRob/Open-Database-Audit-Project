@@ -1,15 +1,15 @@
 #/bin/bash
 #
-PIDFILE="/opt/odap/bin/odap.pid"
-CONF_FILE="/opt/odap/bin/config.ini"
+PIDFILE="/var/run/odap.pid"
+CONF_FILE="/etc/odap/config.ini"
 . /lib/lsb/init-functions
 
 start() {
         if [ ! -f $CONF_FILE ]; then
-             echo "You must run /opt/odap/bin/odap -config first"
-             exit -1
+             echo "You must first run as root \"odap -config\""
+             exit 2 
 	fi
-  start-stop-daemon --start --q --pidfile $PIDFILE --exec /opt/odap/bin/odap	
+  start-stop-daemon --start --q --pidfile $PIDFILE --exec /bin/odap	
   if [ "$?" -eq "0" ]; then
 	 echo -e "Starting odap service \033[32m ok\033[0m"
   else

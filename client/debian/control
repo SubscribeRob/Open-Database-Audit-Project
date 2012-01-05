@@ -1,0 +1,15 @@
+Source: odap-client
+Section: audit 
+Priority: extra
+Maintainer: Rob Williams <db2robw@gmail.com>
+Build-Depends: debhelper (>= 8.0.0), autotools-dev
+Standards-Version: 3.9.2
+Homepage: <insert the upstream URL, if relevant>
+#Vcs-Git: git://git.debian.org/collab-maint/odap-client.git
+#Vcs-Browser: http://git.debian.org/?p=collab-maint/odap-client.git;a=summary
+
+Package: odap-client
+Architecture: any
+Depends: ${shlibs:Depends}, ${misc:Depends}
+Description: Audits all access to your DBMS and stores all info in the cloud
+	Audits all access to your DBMS and stores all info in the cloud

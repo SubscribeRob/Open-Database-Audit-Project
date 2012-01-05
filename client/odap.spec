@@ -9,7 +9,6 @@ Release:        %{release}
 Version:	%{version}
 Summary:        Open Database Audit Project client capture program
 BuildRoot:	${buildroot}
-
 Group:          Database/Auditing
 License:        GNU/GPL
 URL:            http://www.opendbaudit.com
@@ -18,25 +17,30 @@ URL:            http://www.opendbaudit.com
 Database Auditing Software
 
 %build
-cd %{_topdir}/Open-Database-Audit-Project/client
-make
-cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
-make
+cd ../Open-Database-Audit-Project/client
+make clean
+./configure --bindir=/usr/bin --sysconfdir=/etc prefix=
+make -j6
 
 %install
-cd %{_topdir}/Open-Database-Audit-Project/client
-make install prefix=$RPM_BUILD_ROOT/opt/odap
-cd %{_topdir}/Open-Database-Audit-Project/kernel/linux
-make install prefix=$RPM_BUILD_ROOT
+cd ../Open-Database-Audit-Project/client
+make DESTDIR=${RPM_BUILD_ROOT} install 
 
-%preun
-rm -rf /opt/odap
-rm -f /etc/init.d/odap
+
+%clean
+if [ "$RPM_BUILD_ROOT" != "/" ]; then
+        rm -rf $RPM_BUILD_ROOT
+fi
 
 %files
 %defattr(-,root,root)
-/opt/odap/bin/odap
-/opt/odap/bin/certificate.pem
-/opt/odap/bin/log4j.properties
-/opt/odap/kernel/odap_monitor.ko
+/usr/bin/odap
+/etc/odap/certificate.pem
+/etc/odap/log4j.properties
 /etc/init.d/odap
+
+%preun  
+rm -f /usr/bin/odap
+rm -f /etc/init.d/odap
+rm -rf /etc/odap
+exit 0

@@ -1,0 +1,11 @@
+Package: odap-client
+Version: 0.9
+Architecture: amd64
+Maintainer: Rob Williams <db2robw@gmail.com>
+Installed-Size: 1620
+Depends: libapr1 (>= 1.2.7), libaprutil1 (>= 1.2.7+dfsg), libc6 (>= 2.4), libgcc1 (>= 1:4.1.1), libpcap0.8 (>= 0.9.8), libssl1.0.0 (>= 1.0.0), libstdc++6 (>= 4.6)
+Section: audit
+Priority: extra
+Homepage: <insert the upstream URL, if relevant>
+Description: Audits all access to your DBMS and stores all info in the cloud
+ Audits all access to your DBMS and stores all info in the cloud
