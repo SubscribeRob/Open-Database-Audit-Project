@@ -18,6 +18,8 @@
  */
 package com.odap.server.audit;
 
+import com.jolbox.bonecp.BoneCP;
+import com.jolbox.bonecp.BoneCPConfig;
 import com.odap.common.thrift.AuditEvent;
 import com.odap.common.thrift.Config;
 import com.odap.common.util.LogUtil;
@@ -51,7 +53,7 @@ public class AuditServer {
 	public static Config.Processor<ConfigHandler> config_processor; 
 	public static HTable table;
 	public static byte audit_server_id = 0x01;
-	public static Connection conn = null;
+	public static BoneCP connectionPool = null;
 	public static String[] args_cpy;
 	static Logger logger = LogUtil.getInstance();
 	private static String keystore_password;
@@ -72,11 +74,14 @@ public class AuditServer {
 	        keystore_password = args[2];
 
 	        DbUtils.loadDriver("com.mysql.jdbc.Driver");
-	        try {
-				conn = DriverManager.getConnection (url, userName, password);
-			} catch (SQLException e) {
-				logger.error("Unable to connect to mysql",e);
-			}
+	        
+	        BoneCPConfig config = new BoneCPConfig();	// create a new configuration object
+	     	config.setJdbcUrl(url);			// set the JDBC url
+	    	config.setUsername(userName);	// set the username
+	    	config.setPassword(password);	// set the password
+	    	
+	    	connectionPool = new BoneCP(config); 	// setup the connection pool
+
 	        
 	        logger.info ("Database connection established");
 			
@@ -90,7 +95,7 @@ public class AuditServer {
 	            simple(processor, args_cpy[0]);
 	          }
 	         };
-			Runnable config = new Runnable() {
+			Runnable configServer = new Runnable() {
 		          public void run() {
 		        	  configServer(config_processor, args_cpy[0]);
 		          }
@@ -102,7 +107,7 @@ public class AuditServer {
 	          }
 	         };	     
 	      new Thread(simple).start();
-	      new Thread(config).start();
+	      new Thread(configServer).start();
 	      new Thread(heartBeat).start();
 	      
 	      

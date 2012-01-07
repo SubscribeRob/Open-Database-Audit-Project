@@ -81,5 +81,12 @@
 	    <artifactId>odap-common</artifactId>
 	    <version>0.9-DEVELOPMENT</version>
 	</dependency>
+	
+	<dependency>
+			<groupId>com.jolbox</groupId>
+			<artifactId>bonecp</artifactId>
+			<version>0.7.1.RELEASE</version>
+	</dependency>
+	
   </dependencies>
 </project>

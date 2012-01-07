@@ -59,9 +59,9 @@ public class ConfigHandler implements Config.Iface{
 		//Authenticate the user and get the account_id;
 		String query = "SELECT * FROM joomla.cloud_users WHERE username = ? AND password = ?";
 		{
-			String parameters[] = { config.getUsername(), DigestUtils.md5Hex(config.getPassword())};
+			String parameters[] = { config.getUsername().replaceAll("[^A-Za-z0-9 ]", ""), DigestUtils.md5Hex(config.getPassword().replaceAll("[^A-Za-z0-9 ]", ""))};
 			try {
-				List<Map<String,Object>> mapList = (List<Map<String, Object>>) qRunner.query(AuditServer.conn,query,new MapListHandler(),parameters);
+				List<Map<String,Object>> mapList = (List<Map<String, Object>>) qRunner.query(AuditServer.connectionPool.getConnection(),query,new MapListHandler(),parameters);
 				
 				if(mapList.size() < 1){
 					logger.warn("Username " + config.getUsername() + " not authenticated");
@@ -81,12 +81,13 @@ public class ConfigHandler implements Config.Iface{
 			try {
 					{
 						query = "INSERT INTO servers (account_id,server_name,server_software,server_port,server_authentication_token,server_timezone,strip_predicates) VALUES (?,?,?,?,?,?,?)";
-						Object parameters[] = {account_id.toString(),config.getServer_name(),config.getServer_software(),new Short(config.getPort()),session_id,new Double(config.getTimezone_offset()),config.strip_predicates};
-						qRunner.update( AuditServer.conn,query, parameters);
+						Object parameters[] = {account_id.toString(),config.getServer_name().replaceAll("[^A-Za-z0-9 ]", ""),config.getServer_software(),
+								new Short(config.getPort()),session_id,new Double(config.getTimezone_offset()),config.strip_predicates};
+						qRunner.update( AuditServer.connectionPool.getConnection(),query, parameters);
 					}{
 						String parameters[] = {account_id.toString(),config.getServer_name(),session_id};
 						query = "SELECT * FROM servers WHERE account_id = ? AND server_name = ? and server_authentication_token = ?";
-						List<Map<String,Object>> mapList = (List<Map<String, Object>>) qRunner.query(AuditServer.conn,query,new MapListHandler(),parameters);
+						List<Map<String,Object>> mapList = (List<Map<String, Object>>) qRunner.query(AuditServer.connectionPool.getConnection(),query,new MapListHandler(),parameters);
 						
 						if(mapList.size() < 1){
 							logger.error("Unable to find server after after registering it");
