@@ -84,11 +84,14 @@ public class AuditHandler implements AuditEvent.Iface {
 				Put put = new Put( c); 
 				//put.add(Bytes.toBytes("colfam1"), Bytes.toBytes(e.getOperation()), Bytes.toBytes(e.getValue()));
 				put.add(Bytes.toBytes("core"), Bytes.toBytes("src"), Bytes.toBytes(e.getSrc_ip()));
-				put.add(Bytes.toBytes("core"), Bytes.toBytes("port"), Bytes.toBytes(e.getSrc_port()));
+				put.add(Bytes.toBytes("core"), Bytes.toBytes("port"), Bytes.toBytes(Integer.toString(e.getSrc_port())));
 				put.add(Bytes.toBytes("core"), Bytes.toBytes("statement"), Bytes.toBytes(e.getStatement()));
 				put.add(Bytes.toBytes("core"), Bytes.toBytes("dbname"), Bytes.toBytes(e.getDbname().toUpperCase()));
 				put.add(Bytes.toBytes("core"), Bytes.toBytes("username"), Bytes.toBytes(e.getUsername().toUpperCase()));
 				put.add(Bytes.toBytes("core"), Bytes.toBytes("application"), Bytes.toBytes(e.getAppname().toUpperCase()));
+				
+				//Putting in timestamp for now as hive doesn't support working on compound keys
+				put.add(Bytes.toBytes("core"), Bytes.toBytes("source_time"), Bytes.toBytes(Integer.toString(e.getTimestamp())));
 				
 				try{
 					AuditServer.table.put(put);
