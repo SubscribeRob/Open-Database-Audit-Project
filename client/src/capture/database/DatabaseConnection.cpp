@@ -203,16 +203,22 @@ bool DatabaseConnection::parse(  char *data, int len){
 			string end = (data+offset_describe);
 			if(len > 5){
 				if(end.size() > 5 && end.at(1) == ' ' && end.at(2) == '[' && end.find_first_of('-') != -1){
+					event.appname = "mysql";
+					event.src_ip = "127.0.0.1";
+
 					event.appname = end.substr(3,end.find_first_of(':')-3);
 					string port = end.substr(end.find_first_of(':')+1,(end.find_first_of('-') - (end.find_first_of(':')+1)));
 					event.src_port = (short)atoi(port.c_str());
-					event.src_ip = "127.0.0.1";
-					event.appname = "mysql";
-					event.timestamp = std::time(0);
 					frame_offset = end.find_first_of(']')+2;
 
+					event_timestamp event_ts;
+				    event_ts.event_in_s = std::time(0);
+				    event_ts.event_in_ms = 0;
+					userManager.regEventTimestamp(event.src_ip,port,event_ts);
+					userManager.regAppName(event.src_ip,port,event.appname);
 				}
 			}
+
 
 
 			int start_of_packet = end.find_first_of(':',frame_offset);
