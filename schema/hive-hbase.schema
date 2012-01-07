@@ -1,0 +1,5 @@
+DROP TABLE sql_audit;
+CREATE TABLE sql_audit(key string, src_ip string , src_port string, time string, statement string, dbname string, application string, username string)
+STORED BY 'org.apache.hadoop.hive.hbase.HBaseStorageHandler'
+WITH SERDEPROPERTIES ("hbase.columns.mapping" = ":key,core:src,core:port,core:source_time,core:statement,core:dbname,core:application,core:username")
+TBLPROPERTIES ("hbase.table.name" = "sql_audit");
