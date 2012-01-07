@@ -64,7 +64,6 @@ public class EventHBaseHandler {
 		 e.setDbname(new String(res.getValue(Bytes.toBytes("core"), Bytes.toBytes("dbname"))).trim().toUpperCase());
 		 e.setUsername(new String(res.getValue(Bytes.toBytes("core"), Bytes.toBytes("username"))).trim().toUpperCase());
 		 e.setAppname(new String(res.getValue(Bytes.toBytes("core"), Bytes.toBytes("application"))).trim().toUpperCase());
-		 
 		 if(e.getSrc_ip() == null){
 			 e.setSrc_ip("null");
 		 }
@@ -192,7 +191,7 @@ public class EventHBaseHandler {
 		byte[] c = new byte[Bytes.toBytes(server_id).length +4+3];
 		System.arraycopy(Bytes.toBytes(server_id), 0, c, 0, Bytes.toBytes(server_id).length);
 		for(int i = 2; i < c.length; i++){
-		 c[i] = 0x00;
+		 c[i] = (byte)0x00;
 		}
 		 
 		Scan scanner = new Scan();

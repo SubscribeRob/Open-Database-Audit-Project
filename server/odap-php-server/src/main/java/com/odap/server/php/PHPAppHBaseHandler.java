@@ -105,19 +105,9 @@ public class PHPAppHBaseHandler implements DisplayEvents.Iface{
 				 logger.debug("Returning row:" + evt);
 				 
 				 String str = "";
-				 if(parsedStatement.get("columns") != null){
-					 for(String s : parsedStatement.get("columns")){
-						 str += s + ",";
-					 }
-				 }
+
 				 evt.setColumns((str.length() > 0) ? str.substring(0, str.length() -1): "");
-				 str = "";
-				 
-				 if(parsedStatement.get("tables") != null){
-					 for(String s : parsedStatement.get("tables")){
-						 str += s + ",";
-					 }
-				 }
+
 				 evt.setTables((str.length() > 0) ? str.substring(0, str.length() -1): "");
 				 
 				 eventList.add(evt);
