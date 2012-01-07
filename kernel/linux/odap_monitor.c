@@ -251,7 +251,8 @@ static int udmp_stream_sendmsg(struct kiocb *iocb, struct socket *sock, struct m
 			for_each_process(p) {
 				/* Peercred->pid contains tgid of the process */
 				#if LINUX_VERSION_CODE > 132656
-					if(p->tgid == sock->sk->sk_peer_cred->tgcred->tgid)
+					/* Thanks to http://lwn.net/Articles/259217/ */
+					if(p->tgid ==  pid_nr(sock->sk->sk_peer_pid))
 				#else
 					if (p->tgid == sock->sk->sk_peercred.pid)
 				#endif
