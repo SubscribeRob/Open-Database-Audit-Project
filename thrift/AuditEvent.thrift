@@ -17,7 +17,7 @@
  *   The code was developed by Rob Williams
  */
 
-namespace java com.odap.thrift.message
+namespace java com.odap.common.thrift
 
 struct Event {
         1: string src_ip,
