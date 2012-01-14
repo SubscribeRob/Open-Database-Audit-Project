@@ -64,17 +64,14 @@ struct SensitiveObject{
 	3: string discovery_id
 }
 
-service AuditEvent {
-        void store(1: Message msg)
+service OdapService{
+	void store(1: Message msg)
 	void heartbeat(1: i16 server_id, 2: string token)
-}
 
-service Config{
 	ConfigMessage registerNewServer(1: ConfigMessage config)
 	ConfigMessage getConfig(1: ConfigMessage config)
-}
 
-service Discovery {
 	list<DiscoveryObject> getDiscoveryObjects(1: i16 server_id, 2: string token)
 	void setSensitiveObjects(1: i16 server_id, 2: string token, 3: list<SensitiveObject> sensitive_objects)
+
 }
