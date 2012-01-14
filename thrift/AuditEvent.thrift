@@ -49,6 +49,21 @@ struct ConfigMessage{
       10: string server
 }
 
+struct DiscoveryObject {
+	1: i32	discovery_id,
+	2: string operator,
+	3: string name,
+	4: string value,
+	5: double percentage,
+	6: string category
+}
+
+struct SensitiveObject{
+	1: string table_name,
+	2: string dbname,
+	3: string discovery_id
+}
+
 service AuditEvent {
         void store(1: Message msg)
 	void heartbeat(1: i16 server_id, 2: string token)
@@ -57,4 +72,9 @@ service AuditEvent {
 service Config{
 	ConfigMessage registerNewServer(1: ConfigMessage config)
 	ConfigMessage getConfig(1: ConfigMessage config)
+}
+
+service Discovery {
+	list<DiscoveryObject> getDiscoveryObjects(1: i16 server_id, 2: string token)
+	void setSensitiveObjects(1: i16 server_id, 2: string token, 3: list<SensitiveObject> sensitive_objects)
 }
