@@ -27,21 +27,21 @@ import java.util.Arrays;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-public class AuditEvent {
+public class Discovery {
 
   public interface Iface {
 
-    public void store(Message msg) throws org.apache.thrift.TException;
+    public List<DiscoveryObject> getDiscoveryObjects(short server_id, String token) throws org.apache.thrift.TException;
 
-    public void heartbeat(short server_id, String token) throws org.apache.thrift.TException;
+    public void setSensitiveObjects(short server_id, String token, List<SensitiveObject> sensitive_objects) throws org.apache.thrift.TException;
 
   }
 
   public interface AsyncIface {
 
-    public void store(Message msg, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.store_call> resultHandler) throws org.apache.thrift.TException;
+    public void getDiscoveryObjects(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.getDiscoveryObjects_call> resultHandler) throws org.apache.thrift.TException;
 
-    public void heartbeat(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.heartbeat_call> resultHandler) throws org.apache.thrift.TException;
+    public void setSensitiveObjects(short server_id, String token, List<SensitiveObject> sensitive_objects, org.apache.thrift.async.AsyncMethodCallback<AsyncClient.setSensitiveObjects_call> resultHandler) throws org.apache.thrift.TException;
 
   }
 
@@ -65,44 +65,49 @@ public class AuditEvent {
       super(iprot, oprot);
     }
 
-    public void store(Message msg) throws org.apache.thrift.TException
+    public List<DiscoveryObject> getDiscoveryObjects(short server_id, String token) throws org.apache.thrift.TException
     {
-      send_store(msg);
-      recv_store();
+      send_getDiscoveryObjects(server_id, token);
+      return recv_getDiscoveryObjects();
     }
 
-    public void send_store(Message msg) throws org.apache.thrift.TException
+    public void send_getDiscoveryObjects(short server_id, String token) throws org.apache.thrift.TException
     {
-      store_args args = new store_args();
-      args.setMsg(msg);
-      sendBase("store", args);
-    }
-
-    public void recv_store() throws org.apache.thrift.TException
-    {
-      store_result result = new store_result();
-      receiveBase(result, "store");
-      return;
-    }
-
-    public void heartbeat(short server_id, String token) throws org.apache.thrift.TException
-    {
-      send_heartbeat(server_id, token);
-      recv_heartbeat();
-    }
-
-    public void send_heartbeat(short server_id, String token) throws org.apache.thrift.TException
-    {
-      heartbeat_args args = new heartbeat_args();
+      getDiscoveryObjects_args args = new getDiscoveryObjects_args();
       args.setServer_id(server_id);
       args.setToken(token);
-      sendBase("heartbeat", args);
+      sendBase("getDiscoveryObjects", args);
     }
 
-    public void recv_heartbeat() throws org.apache.thrift.TException
+    public List<DiscoveryObject> recv_getDiscoveryObjects() throws org.apache.thrift.TException
     {
-      heartbeat_result result = new heartbeat_result();
-      receiveBase(result, "heartbeat");
+      getDiscoveryObjects_result result = new getDiscoveryObjects_result();
+      receiveBase(result, "getDiscoveryObjects");
+      if (result.isSetSuccess()) {
+        return result.success;
+      }
+      throw new org.apache.thrift.TApplicationException(org.apache.thrift.TApplicationException.MISSING_RESULT, "getDiscoveryObjects failed: unknown result");
+    }
+
+    public void setSensitiveObjects(short server_id, String token, List<SensitiveObject> sensitive_objects) throws org.apache.thrift.TException
+    {
+      send_setSensitiveObjects(server_id, token, sensitive_objects);
+      recv_setSensitiveObjects();
+    }
+
+    public void send_setSensitiveObjects(short server_id, String token, List<SensitiveObject> sensitive_objects) throws org.apache.thrift.TException
+    {
+      setSensitiveObjects_args args = new setSensitiveObjects_args();
+      args.setServer_id(server_id);
+      args.setToken(token);
+      args.setSensitive_objects(sensitive_objects);
+      sendBase("setSensitiveObjects", args);
+    }
+
+    public void recv_setSensitiveObjects() throws org.apache.thrift.TException
+    {
+      setSensitiveObjects_result result = new setSensitiveObjects_result();
+      receiveBase(result, "setSensitiveObjects");
       return;
     }
 
@@ -124,59 +129,65 @@ public class AuditEvent {
       super(protocolFactory, clientManager, transport);
     }
 
-    public void store(Message msg, org.apache.thrift.async.AsyncMethodCallback<store_call> resultHandler) throws org.apache.thrift.TException {
+    public void getDiscoveryObjects(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<getDiscoveryObjects_call> resultHandler) throws org.apache.thrift.TException {
       checkReady();
-      store_call method_call = new store_call(msg, resultHandler, this, ___protocolFactory, ___transport);
+      getDiscoveryObjects_call method_call = new getDiscoveryObjects_call(server_id, token, resultHandler, this, ___protocolFactory, ___transport);
       this.___currentMethod = method_call;
       ___manager.call(method_call);
     }
 
-    public static class store_call extends org.apache.thrift.async.TAsyncMethodCall {
-      private Message msg;
-      public store_call(Message msg, org.apache.thrift.async.AsyncMethodCallback<store_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
-        super(client, protocolFactory, transport, resultHandler, false);
-        this.msg = msg;
-      }
-
-      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("store", org.apache.thrift.protocol.TMessageType.CALL, 0));
-        store_args args = new store_args();
-        args.setMsg(msg);
-        args.write(prot);
-        prot.writeMessageEnd();
-      }
-
-      public void getResult() throws org.apache.thrift.TException {
-        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
-          throw new IllegalStateException("Method call not finished!");
-        }
-        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
-        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
-        (new Client(prot)).recv_store();
-      }
-    }
-
-    public void heartbeat(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<heartbeat_call> resultHandler) throws org.apache.thrift.TException {
-      checkReady();
-      heartbeat_call method_call = new heartbeat_call(server_id, token, resultHandler, this, ___protocolFactory, ___transport);
-      this.___currentMethod = method_call;
-      ___manager.call(method_call);
-    }
-
-    public static class heartbeat_call extends org.apache.thrift.async.TAsyncMethodCall {
+    public static class getDiscoveryObjects_call extends org.apache.thrift.async.TAsyncMethodCall {
       private short server_id;
       private String token;
-      public heartbeat_call(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<heartbeat_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+      public getDiscoveryObjects_call(short server_id, String token, org.apache.thrift.async.AsyncMethodCallback<getDiscoveryObjects_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
         super(client, protocolFactory, transport, resultHandler, false);
         this.server_id = server_id;
         this.token = token;
       }
 
       public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
-        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("heartbeat", org.apache.thrift.protocol.TMessageType.CALL, 0));
-        heartbeat_args args = new heartbeat_args();
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("getDiscoveryObjects", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        getDiscoveryObjects_args args = new getDiscoveryObjects_args();
         args.setServer_id(server_id);
         args.setToken(token);
+        args.write(prot);
+        prot.writeMessageEnd();
+      }
+
+      public List<DiscoveryObject> getResult() throws org.apache.thrift.TException {
+        if (getState() != org.apache.thrift.async.TAsyncMethodCall.State.RESPONSE_READ) {
+          throw new IllegalStateException("Method call not finished!");
+        }
+        org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
+        org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
+        return (new Client(prot)).recv_getDiscoveryObjects();
+      }
+    }
+
+    public void setSensitiveObjects(short server_id, String token, List<SensitiveObject> sensitive_objects, org.apache.thrift.async.AsyncMethodCallback<setSensitiveObjects_call> resultHandler) throws org.apache.thrift.TException {
+      checkReady();
+      setSensitiveObjects_call method_call = new setSensitiveObjects_call(server_id, token, sensitive_objects, resultHandler, this, ___protocolFactory, ___transport);
+      this.___currentMethod = method_call;
+      ___manager.call(method_call);
+    }
+
+    public static class setSensitiveObjects_call extends org.apache.thrift.async.TAsyncMethodCall {
+      private short server_id;
+      private String token;
+      private List<SensitiveObject> sensitive_objects;
+      public setSensitiveObjects_call(short server_id, String token, List<SensitiveObject> sensitive_objects, org.apache.thrift.async.AsyncMethodCallback<setSensitiveObjects_call> resultHandler, org.apache.thrift.async.TAsyncClient client, org.apache.thrift.protocol.TProtocolFactory protocolFactory, org.apache.thrift.transport.TNonblockingTransport transport) throws org.apache.thrift.TException {
+        super(client, protocolFactory, transport, resultHandler, false);
+        this.server_id = server_id;
+        this.token = token;
+        this.sensitive_objects = sensitive_objects;
+      }
+
+      public void write_args(org.apache.thrift.protocol.TProtocol prot) throws org.apache.thrift.TException {
+        prot.writeMessageBegin(new org.apache.thrift.protocol.TMessage("setSensitiveObjects", org.apache.thrift.protocol.TMessageType.CALL, 0));
+        setSensitiveObjects_args args = new setSensitiveObjects_args();
+        args.setServer_id(server_id);
+        args.setToken(token);
+        args.setSensitive_objects(sensitive_objects);
         args.write(prot);
         prot.writeMessageEnd();
       }
@@ -187,7 +198,7 @@ public class AuditEvent {
         }
         org.apache.thrift.transport.TMemoryInputTransport memoryTransport = new org.apache.thrift.transport.TMemoryInputTransport(getFrameBuffer().array());
         org.apache.thrift.protocol.TProtocol prot = client.getProtocolFactory().getProtocol(memoryTransport);
-        (new Client(prot)).recv_heartbeat();
+        (new Client(prot)).recv_setSensitiveObjects();
       }
     }
 
@@ -204,655 +215,55 @@ public class AuditEvent {
     }
 
     private static <I extends Iface> Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> getProcessMap(Map<String,  org.apache.thrift.ProcessFunction<I, ? extends  org.apache.thrift.TBase>> processMap) {
-      processMap.put("store", new store());
-      processMap.put("heartbeat", new heartbeat());
+      processMap.put("getDiscoveryObjects", new getDiscoveryObjects());
+      processMap.put("setSensitiveObjects", new setSensitiveObjects());
       return processMap;
     }
 
-    private static class store<I extends Iface> extends org.apache.thrift.ProcessFunction<I, store_args> {
-      public store() {
-        super("store");
+    private static class getDiscoveryObjects<I extends Iface> extends org.apache.thrift.ProcessFunction<I, getDiscoveryObjects_args> {
+      public getDiscoveryObjects() {
+        super("getDiscoveryObjects");
       }
 
-      protected store_args getEmptyArgsInstance() {
-        return new store_args();
+      protected getDiscoveryObjects_args getEmptyArgsInstance() {
+        return new getDiscoveryObjects_args();
       }
 
-      protected store_result getResult(I iface, store_args args) throws org.apache.thrift.TException {
-        store_result result = new store_result();
-        iface.store(args.msg);
+      protected getDiscoveryObjects_result getResult(I iface, getDiscoveryObjects_args args) throws org.apache.thrift.TException {
+        getDiscoveryObjects_result result = new getDiscoveryObjects_result();
+        result.success = iface.getDiscoveryObjects(args.server_id, args.token);
         return result;
       }
     }
 
-    private static class heartbeat<I extends Iface> extends org.apache.thrift.ProcessFunction<I, heartbeat_args> {
-      public heartbeat() {
-        super("heartbeat");
+    private static class setSensitiveObjects<I extends Iface> extends org.apache.thrift.ProcessFunction<I, setSensitiveObjects_args> {
+      public setSensitiveObjects() {
+        super("setSensitiveObjects");
       }
 
-      protected heartbeat_args getEmptyArgsInstance() {
-        return new heartbeat_args();
+      protected setSensitiveObjects_args getEmptyArgsInstance() {
+        return new setSensitiveObjects_args();
       }
 
-      protected heartbeat_result getResult(I iface, heartbeat_args args) throws org.apache.thrift.TException {
-        heartbeat_result result = new heartbeat_result();
-        iface.heartbeat(args.server_id, args.token);
+      protected setSensitiveObjects_result getResult(I iface, setSensitiveObjects_args args) throws org.apache.thrift.TException {
+        setSensitiveObjects_result result = new setSensitiveObjects_result();
+        iface.setSensitiveObjects(args.server_id, args.token, args.sensitive_objects);
         return result;
       }
     }
 
   }
 
-  public static class store_args implements org.apache.thrift.TBase<store_args, store_args._Fields>, java.io.Serializable, Cloneable   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("store_args");
-
-    private static final org.apache.thrift.protocol.TField MSG_FIELD_DESC = new org.apache.thrift.protocol.TField("msg", org.apache.thrift.protocol.TType.STRUCT, (short)1);
-
-    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
-    static {
-      schemes.put(StandardScheme.class, new store_argsStandardSchemeFactory());
-      schemes.put(TupleScheme.class, new store_argsTupleSchemeFactory());
-    }
-
-    public Message msg; // required
-
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
-    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-      MSG((short)1, "msg");
-
-      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
-
-      static {
-        for (_Fields field : EnumSet.allOf(_Fields.class)) {
-          byName.put(field.getFieldName(), field);
-        }
-      }
-
-      /**
-       * Find the _Fields constant that matches fieldId, or null if its not found.
-       */
-      public static _Fields findByThriftId(int fieldId) {
-        switch(fieldId) {
-          case 1: // MSG
-            return MSG;
-          default:
-            return null;
-        }
-      }
-
-      /**
-       * Find the _Fields constant that matches fieldId, throwing an exception
-       * if it is not found.
-       */
-      public static _Fields findByThriftIdOrThrow(int fieldId) {
-        _Fields fields = findByThriftId(fieldId);
-        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
-        return fields;
-      }
-
-      /**
-       * Find the _Fields constant that matches name, or null if its not found.
-       */
-      public static _Fields findByName(String name) {
-        return byName.get(name);
-      }
-
-      private final short _thriftId;
-      private final String _fieldName;
-
-      _Fields(short thriftId, String fieldName) {
-        _thriftId = thriftId;
-        _fieldName = fieldName;
-      }
-
-      public short getThriftFieldId() {
-        return _thriftId;
-      }
-
-      public String getFieldName() {
-        return _fieldName;
-      }
-    }
-
-    // isset id assignments
-    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
-    static {
-      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-      tmpMap.put(_Fields.MSG, new org.apache.thrift.meta_data.FieldMetaData("msg", org.apache.thrift.TFieldRequirementType.DEFAULT, 
-          new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, Message.class)));
-      metaDataMap = Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(store_args.class, metaDataMap);
-    }
-
-    public store_args() {
-    }
-
-    public store_args(
-      Message msg)
-    {
-      this();
-      this.msg = msg;
-    }
-
-    /**
-     * Performs a deep copy on <i>other</i>.
-     */
-    public store_args(store_args other) {
-      if (other.isSetMsg()) {
-        this.msg = new Message(other.msg);
-      }
-    }
-
-    public store_args deepCopy() {
-      return new store_args(this);
-    }
-
-    @Override
-    public void clear() {
-      this.msg = null;
-    }
-
-    public Message getMsg() {
-      return this.msg;
-    }
-
-    public store_args setMsg(Message msg) {
-      this.msg = msg;
-      return this;
-    }
-
-    public void unsetMsg() {
-      this.msg = null;
-    }
-
-    /** Returns true if field msg is set (has been assigned a value) and false otherwise */
-    public boolean isSetMsg() {
-      return this.msg != null;
-    }
-
-    public void setMsgIsSet(boolean value) {
-      if (!value) {
-        this.msg = null;
-      }
-    }
-
-    public void setFieldValue(_Fields field, Object value) {
-      switch (field) {
-      case MSG:
-        if (value == null) {
-          unsetMsg();
-        } else {
-          setMsg((Message)value);
-        }
-        break;
-
-      }
-    }
-
-    public Object getFieldValue(_Fields field) {
-      switch (field) {
-      case MSG:
-        return getMsg();
-
-      }
-      throw new IllegalStateException();
-    }
-
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
-    public boolean isSet(_Fields field) {
-      if (field == null) {
-        throw new IllegalArgumentException();
-      }
-
-      switch (field) {
-      case MSG:
-        return isSetMsg();
-      }
-      throw new IllegalStateException();
-    }
-
-    @Override
-    public boolean equals(Object that) {
-      if (that == null)
-        return false;
-      if (that instanceof store_args)
-        return this.equals((store_args)that);
-      return false;
-    }
-
-    public boolean equals(store_args that) {
-      if (that == null)
-        return false;
-
-      boolean this_present_msg = true && this.isSetMsg();
-      boolean that_present_msg = true && that.isSetMsg();
-      if (this_present_msg || that_present_msg) {
-        if (!(this_present_msg && that_present_msg))
-          return false;
-        if (!this.msg.equals(that.msg))
-          return false;
-      }
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      return 0;
-    }
-
-    public int compareTo(store_args other) {
-      if (!getClass().equals(other.getClass())) {
-        return getClass().getName().compareTo(other.getClass().getName());
-      }
-
-      int lastComparison = 0;
-      store_args typedOther = (store_args)other;
-
-      lastComparison = Boolean.valueOf(isSetMsg()).compareTo(typedOther.isSetMsg());
-      if (lastComparison != 0) {
-        return lastComparison;
-      }
-      if (isSetMsg()) {
-        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.msg, typedOther.msg);
-        if (lastComparison != 0) {
-          return lastComparison;
-        }
-      }
-      return 0;
-    }
-
-    public _Fields fieldForId(int fieldId) {
-      return _Fields.findByThriftId(fieldId);
-    }
-
-    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
-      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
-    }
-
-    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
-      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
-    }
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder("store_args(");
-      boolean first = true;
-
-      sb.append("msg:");
-      if (this.msg == null) {
-        sb.append("null");
-      } else {
-        sb.append(this.msg);
-      }
-      first = false;
-      sb.append(")");
-      return sb.toString();
-    }
-
-    public void validate() throws org.apache.thrift.TException {
-      // check for required fields
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-      try {
-        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
-      } catch (org.apache.thrift.TException te) {
-        throw new java.io.IOException(te);
-      }
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-      try {
-        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
-      } catch (org.apache.thrift.TException te) {
-        throw new java.io.IOException(te);
-      }
-    }
-
-    private static class store_argsStandardSchemeFactory implements SchemeFactory {
-      public store_argsStandardScheme getScheme() {
-        return new store_argsStandardScheme();
-      }
-    }
-
-    private static class store_argsStandardScheme extends StandardScheme<store_args> {
-
-      public void read(org.apache.thrift.protocol.TProtocol iprot, store_args struct) throws org.apache.thrift.TException {
-        org.apache.thrift.protocol.TField schemeField;
-        iprot.readStructBegin();
-        while (true)
-        {
-          schemeField = iprot.readFieldBegin();
-          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
-            break;
-          }
-          switch (schemeField.id) {
-            case 1: // MSG
-              if (schemeField.type == org.apache.thrift.protocol.TType.STRUCT) {
-                struct.msg = new Message();
-                struct.msg.read(iprot);
-                struct.setMsgIsSet(true);
-              } else { 
-                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-              }
-              break;
-            default:
-              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-          }
-          iprot.readFieldEnd();
-        }
-        iprot.readStructEnd();
-
-        // check for required fields of primitive type, which can't be checked in the validate method
-        struct.validate();
-      }
-
-      public void write(org.apache.thrift.protocol.TProtocol oprot, store_args struct) throws org.apache.thrift.TException {
-        struct.validate();
-
-        oprot.writeStructBegin(STRUCT_DESC);
-        if (struct.msg != null) {
-          oprot.writeFieldBegin(MSG_FIELD_DESC);
-          struct.msg.write(oprot);
-          oprot.writeFieldEnd();
-        }
-        oprot.writeFieldStop();
-        oprot.writeStructEnd();
-      }
-
-    }
-
-    private static class store_argsTupleSchemeFactory implements SchemeFactory {
-      public store_argsTupleScheme getScheme() {
-        return new store_argsTupleScheme();
-      }
-    }
-
-    private static class store_argsTupleScheme extends TupleScheme<store_args> {
-
-      @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, store_args struct) throws org.apache.thrift.TException {
-        TTupleProtocol oprot = (TTupleProtocol) prot;
-        BitSet optionals = new BitSet();
-        if (struct.isSetMsg()) {
-          optionals.set(0);
-        }
-        oprot.writeBitSet(optionals, 1);
-        if (struct.isSetMsg()) {
-          struct.msg.write(oprot);
-        }
-      }
-
-      @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, store_args struct) throws org.apache.thrift.TException {
-        TTupleProtocol iprot = (TTupleProtocol) prot;
-        BitSet incoming = iprot.readBitSet(1);
-        if (incoming.get(0)) {
-          struct.msg = new Message();
-          struct.msg.read(iprot);
-          struct.setMsgIsSet(true);
-        }
-      }
-    }
-
-  }
-
-  public static class store_result implements org.apache.thrift.TBase<store_result, store_result._Fields>, java.io.Serializable, Cloneable   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("store_result");
-
-
-    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
-    static {
-      schemes.put(StandardScheme.class, new store_resultStandardSchemeFactory());
-      schemes.put(TupleScheme.class, new store_resultTupleSchemeFactory());
-    }
-
-
-    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
-    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
-;
-
-      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
-
-      static {
-        for (_Fields field : EnumSet.allOf(_Fields.class)) {
-          byName.put(field.getFieldName(), field);
-        }
-      }
-
-      /**
-       * Find the _Fields constant that matches fieldId, or null if its not found.
-       */
-      public static _Fields findByThriftId(int fieldId) {
-        switch(fieldId) {
-          default:
-            return null;
-        }
-      }
-
-      /**
-       * Find the _Fields constant that matches fieldId, throwing an exception
-       * if it is not found.
-       */
-      public static _Fields findByThriftIdOrThrow(int fieldId) {
-        _Fields fields = findByThriftId(fieldId);
-        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
-        return fields;
-      }
-
-      /**
-       * Find the _Fields constant that matches name, or null if its not found.
-       */
-      public static _Fields findByName(String name) {
-        return byName.get(name);
-      }
-
-      private final short _thriftId;
-      private final String _fieldName;
-
-      _Fields(short thriftId, String fieldName) {
-        _thriftId = thriftId;
-        _fieldName = fieldName;
-      }
-
-      public short getThriftFieldId() {
-        return _thriftId;
-      }
-
-      public String getFieldName() {
-        return _fieldName;
-      }
-    }
-    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
-    static {
-      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
-      metaDataMap = Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(store_result.class, metaDataMap);
-    }
-
-    public store_result() {
-    }
-
-    /**
-     * Performs a deep copy on <i>other</i>.
-     */
-    public store_result(store_result other) {
-    }
-
-    public store_result deepCopy() {
-      return new store_result(this);
-    }
-
-    @Override
-    public void clear() {
-    }
-
-    public void setFieldValue(_Fields field, Object value) {
-      switch (field) {
-      }
-    }
-
-    public Object getFieldValue(_Fields field) {
-      switch (field) {
-      }
-      throw new IllegalStateException();
-    }
-
-    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
-    public boolean isSet(_Fields field) {
-      if (field == null) {
-        throw new IllegalArgumentException();
-      }
-
-      switch (field) {
-      }
-      throw new IllegalStateException();
-    }
-
-    @Override
-    public boolean equals(Object that) {
-      if (that == null)
-        return false;
-      if (that instanceof store_result)
-        return this.equals((store_result)that);
-      return false;
-    }
-
-    public boolean equals(store_result that) {
-      if (that == null)
-        return false;
-
-      return true;
-    }
-
-    @Override
-    public int hashCode() {
-      return 0;
-    }
-
-    public int compareTo(store_result other) {
-      if (!getClass().equals(other.getClass())) {
-        return getClass().getName().compareTo(other.getClass().getName());
-      }
-
-      int lastComparison = 0;
-      store_result typedOther = (store_result)other;
-
-      return 0;
-    }
-
-    public _Fields fieldForId(int fieldId) {
-      return _Fields.findByThriftId(fieldId);
-    }
-
-    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
-      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
-    }
-
-    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
-      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
-      }
-
-    @Override
-    public String toString() {
-      StringBuilder sb = new StringBuilder("store_result(");
-      boolean first = true;
-
-      sb.append(")");
-      return sb.toString();
-    }
-
-    public void validate() throws org.apache.thrift.TException {
-      // check for required fields
-    }
-
-    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
-      try {
-        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
-      } catch (org.apache.thrift.TException te) {
-        throw new java.io.IOException(te);
-      }
-    }
-
-    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
-      try {
-        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
-      } catch (org.apache.thrift.TException te) {
-        throw new java.io.IOException(te);
-      }
-    }
-
-    private static class store_resultStandardSchemeFactory implements SchemeFactory {
-      public store_resultStandardScheme getScheme() {
-        return new store_resultStandardScheme();
-      }
-    }
-
-    private static class store_resultStandardScheme extends StandardScheme<store_result> {
-
-      public void read(org.apache.thrift.protocol.TProtocol iprot, store_result struct) throws org.apache.thrift.TException {
-        org.apache.thrift.protocol.TField schemeField;
-        iprot.readStructBegin();
-        while (true)
-        {
-          schemeField = iprot.readFieldBegin();
-          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
-            break;
-          }
-          switch (schemeField.id) {
-            default:
-              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
-          }
-          iprot.readFieldEnd();
-        }
-        iprot.readStructEnd();
-
-        // check for required fields of primitive type, which can't be checked in the validate method
-        struct.validate();
-      }
-
-      public void write(org.apache.thrift.protocol.TProtocol oprot, store_result struct) throws org.apache.thrift.TException {
-        struct.validate();
-
-        oprot.writeStructBegin(STRUCT_DESC);
-        oprot.writeFieldStop();
-        oprot.writeStructEnd();
-      }
-
-    }
-
-    private static class store_resultTupleSchemeFactory implements SchemeFactory {
-      public store_resultTupleScheme getScheme() {
-        return new store_resultTupleScheme();
-      }
-    }
-
-    private static class store_resultTupleScheme extends TupleScheme<store_result> {
-
-      @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, store_result struct) throws org.apache.thrift.TException {
-        TTupleProtocol oprot = (TTupleProtocol) prot;
-      }
-
-      @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, store_result struct) throws org.apache.thrift.TException {
-        TTupleProtocol iprot = (TTupleProtocol) prot;
-      }
-    }
-
-  }
-
-  public static class heartbeat_args implements org.apache.thrift.TBase<heartbeat_args, heartbeat_args._Fields>, java.io.Serializable, Cloneable   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("heartbeat_args");
+  public static class getDiscoveryObjects_args implements org.apache.thrift.TBase<getDiscoveryObjects_args, getDiscoveryObjects_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getDiscoveryObjects_args");
 
     private static final org.apache.thrift.protocol.TField SERVER_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("server_id", org.apache.thrift.protocol.TType.I16, (short)1);
     private static final org.apache.thrift.protocol.TField TOKEN_FIELD_DESC = new org.apache.thrift.protocol.TField("token", org.apache.thrift.protocol.TType.STRING, (short)2);
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
-      schemes.put(StandardScheme.class, new heartbeat_argsStandardSchemeFactory());
-      schemes.put(TupleScheme.class, new heartbeat_argsTupleSchemeFactory());
+      schemes.put(StandardScheme.class, new getDiscoveryObjects_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new getDiscoveryObjects_argsTupleSchemeFactory());
     }
 
     public short server_id; // required
@@ -930,13 +341,13 @@ public class AuditEvent {
       tmpMap.put(_Fields.TOKEN, new org.apache.thrift.meta_data.FieldMetaData("token", org.apache.thrift.TFieldRequirementType.DEFAULT, 
           new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(heartbeat_args.class, metaDataMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getDiscoveryObjects_args.class, metaDataMap);
     }
 
-    public heartbeat_args() {
+    public getDiscoveryObjects_args() {
     }
 
-    public heartbeat_args(
+    public getDiscoveryObjects_args(
       short server_id,
       String token)
     {
@@ -949,7 +360,7 @@ public class AuditEvent {
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public heartbeat_args(heartbeat_args other) {
+    public getDiscoveryObjects_args(getDiscoveryObjects_args other) {
       __isset_bit_vector.clear();
       __isset_bit_vector.or(other.__isset_bit_vector);
       this.server_id = other.server_id;
@@ -958,8 +369,8 @@ public class AuditEvent {
       }
     }
 
-    public heartbeat_args deepCopy() {
-      return new heartbeat_args(this);
+    public getDiscoveryObjects_args deepCopy() {
+      return new getDiscoveryObjects_args(this);
     }
 
     @Override
@@ -973,7 +384,7 @@ public class AuditEvent {
       return this.server_id;
     }
 
-    public heartbeat_args setServer_id(short server_id) {
+    public getDiscoveryObjects_args setServer_id(short server_id) {
       this.server_id = server_id;
       setServer_idIsSet(true);
       return this;
@@ -996,7 +407,7 @@ public class AuditEvent {
       return this.token;
     }
 
-    public heartbeat_args setToken(String token) {
+    public getDiscoveryObjects_args setToken(String token) {
       this.token = token;
       return this;
     }
@@ -1068,12 +479,12 @@ public class AuditEvent {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof heartbeat_args)
-        return this.equals((heartbeat_args)that);
+      if (that instanceof getDiscoveryObjects_args)
+        return this.equals((getDiscoveryObjects_args)that);
       return false;
     }
 
-    public boolean equals(heartbeat_args that) {
+    public boolean equals(getDiscoveryObjects_args that) {
       if (that == null)
         return false;
 
@@ -1103,13 +514,13 @@ public class AuditEvent {
       return 0;
     }
 
-    public int compareTo(heartbeat_args other) {
+    public int compareTo(getDiscoveryObjects_args other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      heartbeat_args typedOther = (heartbeat_args)other;
+      getDiscoveryObjects_args typedOther = (getDiscoveryObjects_args)other;
 
       lastComparison = Boolean.valueOf(isSetServer_id()).compareTo(typedOther.isSetServer_id());
       if (lastComparison != 0) {
@@ -1148,7 +559,7 @@ public class AuditEvent {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("heartbeat_args(");
+      StringBuilder sb = new StringBuilder("getDiscoveryObjects_args(");
       boolean first = true;
 
       sb.append("server_id:");
@@ -1188,15 +599,15 @@ public class AuditEvent {
       }
     }
 
-    private static class heartbeat_argsStandardSchemeFactory implements SchemeFactory {
-      public heartbeat_argsStandardScheme getScheme() {
-        return new heartbeat_argsStandardScheme();
+    private static class getDiscoveryObjects_argsStandardSchemeFactory implements SchemeFactory {
+      public getDiscoveryObjects_argsStandardScheme getScheme() {
+        return new getDiscoveryObjects_argsStandardScheme();
       }
     }
 
-    private static class heartbeat_argsStandardScheme extends StandardScheme<heartbeat_args> {
+    private static class getDiscoveryObjects_argsStandardScheme extends StandardScheme<getDiscoveryObjects_args> {
 
-      public void read(org.apache.thrift.protocol.TProtocol iprot, heartbeat_args struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol iprot, getDiscoveryObjects_args struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TField schemeField;
         iprot.readStructBegin();
         while (true)
@@ -1233,7 +644,7 @@ public class AuditEvent {
         struct.validate();
       }
 
-      public void write(org.apache.thrift.protocol.TProtocol oprot, heartbeat_args struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol oprot, getDiscoveryObjects_args struct) throws org.apache.thrift.TException {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
@@ -1251,16 +662,16 @@ public class AuditEvent {
 
     }
 
-    private static class heartbeat_argsTupleSchemeFactory implements SchemeFactory {
-      public heartbeat_argsTupleScheme getScheme() {
-        return new heartbeat_argsTupleScheme();
+    private static class getDiscoveryObjects_argsTupleSchemeFactory implements SchemeFactory {
+      public getDiscoveryObjects_argsTupleScheme getScheme() {
+        return new getDiscoveryObjects_argsTupleScheme();
       }
     }
 
-    private static class heartbeat_argsTupleScheme extends TupleScheme<heartbeat_args> {
+    private static class getDiscoveryObjects_argsTupleScheme extends TupleScheme<getDiscoveryObjects_args> {
 
       @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, heartbeat_args struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol prot, getDiscoveryObjects_args struct) throws org.apache.thrift.TException {
         TTupleProtocol oprot = (TTupleProtocol) prot;
         BitSet optionals = new BitSet();
         if (struct.isSetServer_id()) {
@@ -1279,7 +690,7 @@ public class AuditEvent {
       }
 
       @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, heartbeat_args struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol prot, getDiscoveryObjects_args struct) throws org.apache.thrift.TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
         BitSet incoming = iprot.readBitSet(2);
         if (incoming.get(0)) {
@@ -1295,14 +706,1027 @@ public class AuditEvent {
 
   }
 
-  public static class heartbeat_result implements org.apache.thrift.TBase<heartbeat_result, heartbeat_result._Fields>, java.io.Serializable, Cloneable   {
-    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("heartbeat_result");
+  public static class getDiscoveryObjects_result implements org.apache.thrift.TBase<getDiscoveryObjects_result, getDiscoveryObjects_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("getDiscoveryObjects_result");
+
+    private static final org.apache.thrift.protocol.TField SUCCESS_FIELD_DESC = new org.apache.thrift.protocol.TField("success", org.apache.thrift.protocol.TType.LIST, (short)0);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new getDiscoveryObjects_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new getDiscoveryObjects_resultTupleSchemeFactory());
+    }
+
+    public List<DiscoveryObject> success; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SUCCESS((short)0, "success");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 0: // SUCCESS
+            return SUCCESS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SUCCESS, new org.apache.thrift.meta_data.FieldMetaData("success", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, DiscoveryObject.class))));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(getDiscoveryObjects_result.class, metaDataMap);
+    }
+
+    public getDiscoveryObjects_result() {
+    }
+
+    public getDiscoveryObjects_result(
+      List<DiscoveryObject> success)
+    {
+      this();
+      this.success = success;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public getDiscoveryObjects_result(getDiscoveryObjects_result other) {
+      if (other.isSetSuccess()) {
+        List<DiscoveryObject> __this__success = new ArrayList<DiscoveryObject>();
+        for (DiscoveryObject other_element : other.success) {
+          __this__success.add(new DiscoveryObject(other_element));
+        }
+        this.success = __this__success;
+      }
+    }
+
+    public getDiscoveryObjects_result deepCopy() {
+      return new getDiscoveryObjects_result(this);
+    }
+
+    @Override
+    public void clear() {
+      this.success = null;
+    }
+
+    public int getSuccessSize() {
+      return (this.success == null) ? 0 : this.success.size();
+    }
+
+    public java.util.Iterator<DiscoveryObject> getSuccessIterator() {
+      return (this.success == null) ? null : this.success.iterator();
+    }
+
+    public void addToSuccess(DiscoveryObject elem) {
+      if (this.success == null) {
+        this.success = new ArrayList<DiscoveryObject>();
+      }
+      this.success.add(elem);
+    }
+
+    public List<DiscoveryObject> getSuccess() {
+      return this.success;
+    }
+
+    public getDiscoveryObjects_result setSuccess(List<DiscoveryObject> success) {
+      this.success = success;
+      return this;
+    }
+
+    public void unsetSuccess() {
+      this.success = null;
+    }
+
+    /** Returns true if field success is set (has been assigned a value) and false otherwise */
+    public boolean isSetSuccess() {
+      return this.success != null;
+    }
+
+    public void setSuccessIsSet(boolean value) {
+      if (!value) {
+        this.success = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case SUCCESS:
+        if (value == null) {
+          unsetSuccess();
+        } else {
+          setSuccess((List<DiscoveryObject>)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SUCCESS:
+        return getSuccess();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SUCCESS:
+        return isSetSuccess();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof getDiscoveryObjects_result)
+        return this.equals((getDiscoveryObjects_result)that);
+      return false;
+    }
+
+    public boolean equals(getDiscoveryObjects_result that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_success = true && this.isSetSuccess();
+      boolean that_present_success = true && that.isSetSuccess();
+      if (this_present_success || that_present_success) {
+        if (!(this_present_success && that_present_success))
+          return false;
+        if (!this.success.equals(that.success))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(getDiscoveryObjects_result other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      getDiscoveryObjects_result typedOther = (getDiscoveryObjects_result)other;
+
+      lastComparison = Boolean.valueOf(isSetSuccess()).compareTo(typedOther.isSetSuccess());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSuccess()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.success, typedOther.success);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+      }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("getDiscoveryObjects_result(");
+      boolean first = true;
+
+      sb.append("success:");
+      if (this.success == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.success);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class getDiscoveryObjects_resultStandardSchemeFactory implements SchemeFactory {
+      public getDiscoveryObjects_resultStandardScheme getScheme() {
+        return new getDiscoveryObjects_resultStandardScheme();
+      }
+    }
+
+    private static class getDiscoveryObjects_resultStandardScheme extends StandardScheme<getDiscoveryObjects_result> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, getDiscoveryObjects_result struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 0: // SUCCESS
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list8 = iprot.readListBegin();
+                  struct.success = new ArrayList<DiscoveryObject>(_list8.size);
+                  for (int _i9 = 0; _i9 < _list8.size; ++_i9)
+                  {
+                    DiscoveryObject _elem10; // required
+                    _elem10 = new DiscoveryObject();
+                    _elem10.read(iprot);
+                    struct.success.add(_elem10);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setSuccessIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, getDiscoveryObjects_result struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        if (struct.success != null) {
+          oprot.writeFieldBegin(SUCCESS_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.success.size()));
+            for (DiscoveryObject _iter11 : struct.success)
+            {
+              _iter11.write(oprot);
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class getDiscoveryObjects_resultTupleSchemeFactory implements SchemeFactory {
+      public getDiscoveryObjects_resultTupleScheme getScheme() {
+        return new getDiscoveryObjects_resultTupleScheme();
+      }
+    }
+
+    private static class getDiscoveryObjects_resultTupleScheme extends TupleScheme<getDiscoveryObjects_result> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, getDiscoveryObjects_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetSuccess()) {
+          optionals.set(0);
+        }
+        oprot.writeBitSet(optionals, 1);
+        if (struct.isSetSuccess()) {
+          {
+            oprot.writeI32(struct.success.size());
+            for (DiscoveryObject _iter12 : struct.success)
+            {
+              _iter12.write(oprot);
+            }
+          }
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, getDiscoveryObjects_result struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(1);
+        if (incoming.get(0)) {
+          {
+            org.apache.thrift.protocol.TList _list13 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.success = new ArrayList<DiscoveryObject>(_list13.size);
+            for (int _i14 = 0; _i14 < _list13.size; ++_i14)
+            {
+              DiscoveryObject _elem15; // required
+              _elem15 = new DiscoveryObject();
+              _elem15.read(iprot);
+              struct.success.add(_elem15);
+            }
+          }
+          struct.setSuccessIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class setSensitiveObjects_args implements org.apache.thrift.TBase<setSensitiveObjects_args, setSensitiveObjects_args._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("setSensitiveObjects_args");
+
+    private static final org.apache.thrift.protocol.TField SERVER_ID_FIELD_DESC = new org.apache.thrift.protocol.TField("server_id", org.apache.thrift.protocol.TType.I16, (short)1);
+    private static final org.apache.thrift.protocol.TField TOKEN_FIELD_DESC = new org.apache.thrift.protocol.TField("token", org.apache.thrift.protocol.TType.STRING, (short)2);
+    private static final org.apache.thrift.protocol.TField SENSITIVE_OBJECTS_FIELD_DESC = new org.apache.thrift.protocol.TField("sensitive_objects", org.apache.thrift.protocol.TType.LIST, (short)3);
+
+    private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
+    static {
+      schemes.put(StandardScheme.class, new setSensitiveObjects_argsStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new setSensitiveObjects_argsTupleSchemeFactory());
+    }
+
+    public short server_id; // required
+    public String token; // required
+    public List<SensitiveObject> sensitive_objects; // required
+
+    /** The set of fields this struct contains, along with convenience methods for finding and manipulating them. */
+    public enum _Fields implements org.apache.thrift.TFieldIdEnum {
+      SERVER_ID((short)1, "server_id"),
+      TOKEN((short)2, "token"),
+      SENSITIVE_OBJECTS((short)3, "sensitive_objects");
+
+      private static final Map<String, _Fields> byName = new HashMap<String, _Fields>();
+
+      static {
+        for (_Fields field : EnumSet.allOf(_Fields.class)) {
+          byName.put(field.getFieldName(), field);
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, or null if its not found.
+       */
+      public static _Fields findByThriftId(int fieldId) {
+        switch(fieldId) {
+          case 1: // SERVER_ID
+            return SERVER_ID;
+          case 2: // TOKEN
+            return TOKEN;
+          case 3: // SENSITIVE_OBJECTS
+            return SENSITIVE_OBJECTS;
+          default:
+            return null;
+        }
+      }
+
+      /**
+       * Find the _Fields constant that matches fieldId, throwing an exception
+       * if it is not found.
+       */
+      public static _Fields findByThriftIdOrThrow(int fieldId) {
+        _Fields fields = findByThriftId(fieldId);
+        if (fields == null) throw new IllegalArgumentException("Field " + fieldId + " doesn't exist!");
+        return fields;
+      }
+
+      /**
+       * Find the _Fields constant that matches name, or null if its not found.
+       */
+      public static _Fields findByName(String name) {
+        return byName.get(name);
+      }
+
+      private final short _thriftId;
+      private final String _fieldName;
+
+      _Fields(short thriftId, String fieldName) {
+        _thriftId = thriftId;
+        _fieldName = fieldName;
+      }
+
+      public short getThriftFieldId() {
+        return _thriftId;
+      }
+
+      public String getFieldName() {
+        return _fieldName;
+      }
+    }
+
+    // isset id assignments
+    private static final int __SERVER_ID_ISSET_ID = 0;
+    private BitSet __isset_bit_vector = new BitSet(1);
+    public static final Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> metaDataMap;
+    static {
+      Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
+      tmpMap.put(_Fields.SERVER_ID, new org.apache.thrift.meta_data.FieldMetaData("server_id", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.I16)));
+      tmpMap.put(_Fields.TOKEN, new org.apache.thrift.meta_data.FieldMetaData("token", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.FieldValueMetaData(org.apache.thrift.protocol.TType.STRING)));
+      tmpMap.put(_Fields.SENSITIVE_OBJECTS, new org.apache.thrift.meta_data.FieldMetaData("sensitive_objects", org.apache.thrift.TFieldRequirementType.DEFAULT, 
+          new org.apache.thrift.meta_data.ListMetaData(org.apache.thrift.protocol.TType.LIST, 
+              new org.apache.thrift.meta_data.StructMetaData(org.apache.thrift.protocol.TType.STRUCT, SensitiveObject.class))));
+      metaDataMap = Collections.unmodifiableMap(tmpMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(setSensitiveObjects_args.class, metaDataMap);
+    }
+
+    public setSensitiveObjects_args() {
+    }
+
+    public setSensitiveObjects_args(
+      short server_id,
+      String token,
+      List<SensitiveObject> sensitive_objects)
+    {
+      this();
+      this.server_id = server_id;
+      setServer_idIsSet(true);
+      this.token = token;
+      this.sensitive_objects = sensitive_objects;
+    }
+
+    /**
+     * Performs a deep copy on <i>other</i>.
+     */
+    public setSensitiveObjects_args(setSensitiveObjects_args other) {
+      __isset_bit_vector.clear();
+      __isset_bit_vector.or(other.__isset_bit_vector);
+      this.server_id = other.server_id;
+      if (other.isSetToken()) {
+        this.token = other.token;
+      }
+      if (other.isSetSensitive_objects()) {
+        List<SensitiveObject> __this__sensitive_objects = new ArrayList<SensitiveObject>();
+        for (SensitiveObject other_element : other.sensitive_objects) {
+          __this__sensitive_objects.add(new SensitiveObject(other_element));
+        }
+        this.sensitive_objects = __this__sensitive_objects;
+      }
+    }
+
+    public setSensitiveObjects_args deepCopy() {
+      return new setSensitiveObjects_args(this);
+    }
+
+    @Override
+    public void clear() {
+      setServer_idIsSet(false);
+      this.server_id = 0;
+      this.token = null;
+      this.sensitive_objects = null;
+    }
+
+    public short getServer_id() {
+      return this.server_id;
+    }
+
+    public setSensitiveObjects_args setServer_id(short server_id) {
+      this.server_id = server_id;
+      setServer_idIsSet(true);
+      return this;
+    }
+
+    public void unsetServer_id() {
+      __isset_bit_vector.clear(__SERVER_ID_ISSET_ID);
+    }
+
+    /** Returns true if field server_id is set (has been assigned a value) and false otherwise */
+    public boolean isSetServer_id() {
+      return __isset_bit_vector.get(__SERVER_ID_ISSET_ID);
+    }
+
+    public void setServer_idIsSet(boolean value) {
+      __isset_bit_vector.set(__SERVER_ID_ISSET_ID, value);
+    }
+
+    public String getToken() {
+      return this.token;
+    }
+
+    public setSensitiveObjects_args setToken(String token) {
+      this.token = token;
+      return this;
+    }
+
+    public void unsetToken() {
+      this.token = null;
+    }
+
+    /** Returns true if field token is set (has been assigned a value) and false otherwise */
+    public boolean isSetToken() {
+      return this.token != null;
+    }
+
+    public void setTokenIsSet(boolean value) {
+      if (!value) {
+        this.token = null;
+      }
+    }
+
+    public int getSensitive_objectsSize() {
+      return (this.sensitive_objects == null) ? 0 : this.sensitive_objects.size();
+    }
+
+    public java.util.Iterator<SensitiveObject> getSensitive_objectsIterator() {
+      return (this.sensitive_objects == null) ? null : this.sensitive_objects.iterator();
+    }
+
+    public void addToSensitive_objects(SensitiveObject elem) {
+      if (this.sensitive_objects == null) {
+        this.sensitive_objects = new ArrayList<SensitiveObject>();
+      }
+      this.sensitive_objects.add(elem);
+    }
+
+    public List<SensitiveObject> getSensitive_objects() {
+      return this.sensitive_objects;
+    }
+
+    public setSensitiveObjects_args setSensitive_objects(List<SensitiveObject> sensitive_objects) {
+      this.sensitive_objects = sensitive_objects;
+      return this;
+    }
+
+    public void unsetSensitive_objects() {
+      this.sensitive_objects = null;
+    }
+
+    /** Returns true if field sensitive_objects is set (has been assigned a value) and false otherwise */
+    public boolean isSetSensitive_objects() {
+      return this.sensitive_objects != null;
+    }
+
+    public void setSensitive_objectsIsSet(boolean value) {
+      if (!value) {
+        this.sensitive_objects = null;
+      }
+    }
+
+    public void setFieldValue(_Fields field, Object value) {
+      switch (field) {
+      case SERVER_ID:
+        if (value == null) {
+          unsetServer_id();
+        } else {
+          setServer_id((Short)value);
+        }
+        break;
+
+      case TOKEN:
+        if (value == null) {
+          unsetToken();
+        } else {
+          setToken((String)value);
+        }
+        break;
+
+      case SENSITIVE_OBJECTS:
+        if (value == null) {
+          unsetSensitive_objects();
+        } else {
+          setSensitive_objects((List<SensitiveObject>)value);
+        }
+        break;
+
+      }
+    }
+
+    public Object getFieldValue(_Fields field) {
+      switch (field) {
+      case SERVER_ID:
+        return Short.valueOf(getServer_id());
+
+      case TOKEN:
+        return getToken();
+
+      case SENSITIVE_OBJECTS:
+        return getSensitive_objects();
+
+      }
+      throw new IllegalStateException();
+    }
+
+    /** Returns true if field corresponding to fieldID is set (has been assigned a value) and false otherwise */
+    public boolean isSet(_Fields field) {
+      if (field == null) {
+        throw new IllegalArgumentException();
+      }
+
+      switch (field) {
+      case SERVER_ID:
+        return isSetServer_id();
+      case TOKEN:
+        return isSetToken();
+      case SENSITIVE_OBJECTS:
+        return isSetSensitive_objects();
+      }
+      throw new IllegalStateException();
+    }
+
+    @Override
+    public boolean equals(Object that) {
+      if (that == null)
+        return false;
+      if (that instanceof setSensitiveObjects_args)
+        return this.equals((setSensitiveObjects_args)that);
+      return false;
+    }
+
+    public boolean equals(setSensitiveObjects_args that) {
+      if (that == null)
+        return false;
+
+      boolean this_present_server_id = true;
+      boolean that_present_server_id = true;
+      if (this_present_server_id || that_present_server_id) {
+        if (!(this_present_server_id && that_present_server_id))
+          return false;
+        if (this.server_id != that.server_id)
+          return false;
+      }
+
+      boolean this_present_token = true && this.isSetToken();
+      boolean that_present_token = true && that.isSetToken();
+      if (this_present_token || that_present_token) {
+        if (!(this_present_token && that_present_token))
+          return false;
+        if (!this.token.equals(that.token))
+          return false;
+      }
+
+      boolean this_present_sensitive_objects = true && this.isSetSensitive_objects();
+      boolean that_present_sensitive_objects = true && that.isSetSensitive_objects();
+      if (this_present_sensitive_objects || that_present_sensitive_objects) {
+        if (!(this_present_sensitive_objects && that_present_sensitive_objects))
+          return false;
+        if (!this.sensitive_objects.equals(that.sensitive_objects))
+          return false;
+      }
+
+      return true;
+    }
+
+    @Override
+    public int hashCode() {
+      return 0;
+    }
+
+    public int compareTo(setSensitiveObjects_args other) {
+      if (!getClass().equals(other.getClass())) {
+        return getClass().getName().compareTo(other.getClass().getName());
+      }
+
+      int lastComparison = 0;
+      setSensitiveObjects_args typedOther = (setSensitiveObjects_args)other;
+
+      lastComparison = Boolean.valueOf(isSetServer_id()).compareTo(typedOther.isSetServer_id());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetServer_id()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.server_id, typedOther.server_id);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetToken()).compareTo(typedOther.isSetToken());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetToken()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.token, typedOther.token);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      lastComparison = Boolean.valueOf(isSetSensitive_objects()).compareTo(typedOther.isSetSensitive_objects());
+      if (lastComparison != 0) {
+        return lastComparison;
+      }
+      if (isSetSensitive_objects()) {
+        lastComparison = org.apache.thrift.TBaseHelper.compareTo(this.sensitive_objects, typedOther.sensitive_objects);
+        if (lastComparison != 0) {
+          return lastComparison;
+        }
+      }
+      return 0;
+    }
+
+    public _Fields fieldForId(int fieldId) {
+      return _Fields.findByThriftId(fieldId);
+    }
+
+    public void read(org.apache.thrift.protocol.TProtocol iprot) throws org.apache.thrift.TException {
+      schemes.get(iprot.getScheme()).getScheme().read(iprot, this);
+    }
+
+    public void write(org.apache.thrift.protocol.TProtocol oprot) throws org.apache.thrift.TException {
+      schemes.get(oprot.getScheme()).getScheme().write(oprot, this);
+    }
+
+    @Override
+    public String toString() {
+      StringBuilder sb = new StringBuilder("setSensitiveObjects_args(");
+      boolean first = true;
+
+      sb.append("server_id:");
+      sb.append(this.server_id);
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("token:");
+      if (this.token == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.token);
+      }
+      first = false;
+      if (!first) sb.append(", ");
+      sb.append("sensitive_objects:");
+      if (this.sensitive_objects == null) {
+        sb.append("null");
+      } else {
+        sb.append(this.sensitive_objects);
+      }
+      first = false;
+      sb.append(")");
+      return sb.toString();
+    }
+
+    public void validate() throws org.apache.thrift.TException {
+      // check for required fields
+    }
+
+    private void writeObject(java.io.ObjectOutputStream out) throws java.io.IOException {
+      try {
+        write(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(out)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private void readObject(java.io.ObjectInputStream in) throws java.io.IOException, ClassNotFoundException {
+      try {
+        // it doesn't seem like you should have to do this, but java serialization is wacky, and doesn't call the default constructor.
+        __isset_bit_vector = new BitSet(1);
+        read(new org.apache.thrift.protocol.TCompactProtocol(new org.apache.thrift.transport.TIOStreamTransport(in)));
+      } catch (org.apache.thrift.TException te) {
+        throw new java.io.IOException(te);
+      }
+    }
+
+    private static class setSensitiveObjects_argsStandardSchemeFactory implements SchemeFactory {
+      public setSensitiveObjects_argsStandardScheme getScheme() {
+        return new setSensitiveObjects_argsStandardScheme();
+      }
+    }
+
+    private static class setSensitiveObjects_argsStandardScheme extends StandardScheme<setSensitiveObjects_args> {
+
+      public void read(org.apache.thrift.protocol.TProtocol iprot, setSensitiveObjects_args struct) throws org.apache.thrift.TException {
+        org.apache.thrift.protocol.TField schemeField;
+        iprot.readStructBegin();
+        while (true)
+        {
+          schemeField = iprot.readFieldBegin();
+          if (schemeField.type == org.apache.thrift.protocol.TType.STOP) { 
+            break;
+          }
+          switch (schemeField.id) {
+            case 1: // SERVER_ID
+              if (schemeField.type == org.apache.thrift.protocol.TType.I16) {
+                struct.server_id = iprot.readI16();
+                struct.setServer_idIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 2: // TOKEN
+              if (schemeField.type == org.apache.thrift.protocol.TType.STRING) {
+                struct.token = iprot.readString();
+                struct.setTokenIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            case 3: // SENSITIVE_OBJECTS
+              if (schemeField.type == org.apache.thrift.protocol.TType.LIST) {
+                {
+                  org.apache.thrift.protocol.TList _list16 = iprot.readListBegin();
+                  struct.sensitive_objects = new ArrayList<SensitiveObject>(_list16.size);
+                  for (int _i17 = 0; _i17 < _list16.size; ++_i17)
+                  {
+                    SensitiveObject _elem18; // required
+                    _elem18 = new SensitiveObject();
+                    _elem18.read(iprot);
+                    struct.sensitive_objects.add(_elem18);
+                  }
+                  iprot.readListEnd();
+                }
+                struct.setSensitive_objectsIsSet(true);
+              } else { 
+                org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+              }
+              break;
+            default:
+              org.apache.thrift.protocol.TProtocolUtil.skip(iprot, schemeField.type);
+          }
+          iprot.readFieldEnd();
+        }
+        iprot.readStructEnd();
+
+        // check for required fields of primitive type, which can't be checked in the validate method
+        struct.validate();
+      }
+
+      public void write(org.apache.thrift.protocol.TProtocol oprot, setSensitiveObjects_args struct) throws org.apache.thrift.TException {
+        struct.validate();
+
+        oprot.writeStructBegin(STRUCT_DESC);
+        oprot.writeFieldBegin(SERVER_ID_FIELD_DESC);
+        oprot.writeI16(struct.server_id);
+        oprot.writeFieldEnd();
+        if (struct.token != null) {
+          oprot.writeFieldBegin(TOKEN_FIELD_DESC);
+          oprot.writeString(struct.token);
+          oprot.writeFieldEnd();
+        }
+        if (struct.sensitive_objects != null) {
+          oprot.writeFieldBegin(SENSITIVE_OBJECTS_FIELD_DESC);
+          {
+            oprot.writeListBegin(new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, struct.sensitive_objects.size()));
+            for (SensitiveObject _iter19 : struct.sensitive_objects)
+            {
+              _iter19.write(oprot);
+            }
+            oprot.writeListEnd();
+          }
+          oprot.writeFieldEnd();
+        }
+        oprot.writeFieldStop();
+        oprot.writeStructEnd();
+      }
+
+    }
+
+    private static class setSensitiveObjects_argsTupleSchemeFactory implements SchemeFactory {
+      public setSensitiveObjects_argsTupleScheme getScheme() {
+        return new setSensitiveObjects_argsTupleScheme();
+      }
+    }
+
+    private static class setSensitiveObjects_argsTupleScheme extends TupleScheme<setSensitiveObjects_args> {
+
+      @Override
+      public void write(org.apache.thrift.protocol.TProtocol prot, setSensitiveObjects_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol oprot = (TTupleProtocol) prot;
+        BitSet optionals = new BitSet();
+        if (struct.isSetServer_id()) {
+          optionals.set(0);
+        }
+        if (struct.isSetToken()) {
+          optionals.set(1);
+        }
+        if (struct.isSetSensitive_objects()) {
+          optionals.set(2);
+        }
+        oprot.writeBitSet(optionals, 3);
+        if (struct.isSetServer_id()) {
+          oprot.writeI16(struct.server_id);
+        }
+        if (struct.isSetToken()) {
+          oprot.writeString(struct.token);
+        }
+        if (struct.isSetSensitive_objects()) {
+          {
+            oprot.writeI32(struct.sensitive_objects.size());
+            for (SensitiveObject _iter20 : struct.sensitive_objects)
+            {
+              _iter20.write(oprot);
+            }
+          }
+        }
+      }
+
+      @Override
+      public void read(org.apache.thrift.protocol.TProtocol prot, setSensitiveObjects_args struct) throws org.apache.thrift.TException {
+        TTupleProtocol iprot = (TTupleProtocol) prot;
+        BitSet incoming = iprot.readBitSet(3);
+        if (incoming.get(0)) {
+          struct.server_id = iprot.readI16();
+          struct.setServer_idIsSet(true);
+        }
+        if (incoming.get(1)) {
+          struct.token = iprot.readString();
+          struct.setTokenIsSet(true);
+        }
+        if (incoming.get(2)) {
+          {
+            org.apache.thrift.protocol.TList _list21 = new org.apache.thrift.protocol.TList(org.apache.thrift.protocol.TType.STRUCT, iprot.readI32());
+            struct.sensitive_objects = new ArrayList<SensitiveObject>(_list21.size);
+            for (int _i22 = 0; _i22 < _list21.size; ++_i22)
+            {
+              SensitiveObject _elem23; // required
+              _elem23 = new SensitiveObject();
+              _elem23.read(iprot);
+              struct.sensitive_objects.add(_elem23);
+            }
+          }
+          struct.setSensitive_objectsIsSet(true);
+        }
+      }
+    }
+
+  }
+
+  public static class setSensitiveObjects_result implements org.apache.thrift.TBase<setSensitiveObjects_result, setSensitiveObjects_result._Fields>, java.io.Serializable, Cloneable   {
+    private static final org.apache.thrift.protocol.TStruct STRUCT_DESC = new org.apache.thrift.protocol.TStruct("setSensitiveObjects_result");
 
 
     private static final Map<Class<? extends IScheme>, SchemeFactory> schemes = new HashMap<Class<? extends IScheme>, SchemeFactory>();
     static {
-      schemes.put(StandardScheme.class, new heartbeat_resultStandardSchemeFactory());
-      schemes.put(TupleScheme.class, new heartbeat_resultTupleSchemeFactory());
+      schemes.put(StandardScheme.class, new setSensitiveObjects_resultStandardSchemeFactory());
+      schemes.put(TupleScheme.class, new setSensitiveObjects_resultTupleSchemeFactory());
     }
 
 
@@ -1365,20 +1789,20 @@ public class AuditEvent {
     static {
       Map<_Fields, org.apache.thrift.meta_data.FieldMetaData> tmpMap = new EnumMap<_Fields, org.apache.thrift.meta_data.FieldMetaData>(_Fields.class);
       metaDataMap = Collections.unmodifiableMap(tmpMap);
-      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(heartbeat_result.class, metaDataMap);
+      org.apache.thrift.meta_data.FieldMetaData.addStructMetaDataMap(setSensitiveObjects_result.class, metaDataMap);
     }
 
-    public heartbeat_result() {
+    public setSensitiveObjects_result() {
     }
 
     /**
      * Performs a deep copy on <i>other</i>.
      */
-    public heartbeat_result(heartbeat_result other) {
+    public setSensitiveObjects_result(setSensitiveObjects_result other) {
     }
 
-    public heartbeat_result deepCopy() {
-      return new heartbeat_result(this);
+    public setSensitiveObjects_result deepCopy() {
+      return new setSensitiveObjects_result(this);
     }
 
     @Override
@@ -1411,12 +1835,12 @@ public class AuditEvent {
     public boolean equals(Object that) {
       if (that == null)
         return false;
-      if (that instanceof heartbeat_result)
-        return this.equals((heartbeat_result)that);
+      if (that instanceof setSensitiveObjects_result)
+        return this.equals((setSensitiveObjects_result)that);
       return false;
     }
 
-    public boolean equals(heartbeat_result that) {
+    public boolean equals(setSensitiveObjects_result that) {
       if (that == null)
         return false;
 
@@ -1428,13 +1852,13 @@ public class AuditEvent {
       return 0;
     }
 
-    public int compareTo(heartbeat_result other) {
+    public int compareTo(setSensitiveObjects_result other) {
       if (!getClass().equals(other.getClass())) {
         return getClass().getName().compareTo(other.getClass().getName());
       }
 
       int lastComparison = 0;
-      heartbeat_result typedOther = (heartbeat_result)other;
+      setSensitiveObjects_result typedOther = (setSensitiveObjects_result)other;
 
       return 0;
     }
@@ -1453,7 +1877,7 @@ public class AuditEvent {
 
     @Override
     public String toString() {
-      StringBuilder sb = new StringBuilder("heartbeat_result(");
+      StringBuilder sb = new StringBuilder("setSensitiveObjects_result(");
       boolean first = true;
 
       sb.append(")");
@@ -1480,15 +1904,15 @@ public class AuditEvent {
       }
     }
 
-    private static class heartbeat_resultStandardSchemeFactory implements SchemeFactory {
-      public heartbeat_resultStandardScheme getScheme() {
-        return new heartbeat_resultStandardScheme();
+    private static class setSensitiveObjects_resultStandardSchemeFactory implements SchemeFactory {
+      public setSensitiveObjects_resultStandardScheme getScheme() {
+        return new setSensitiveObjects_resultStandardScheme();
       }
     }
 
-    private static class heartbeat_resultStandardScheme extends StandardScheme<heartbeat_result> {
+    private static class setSensitiveObjects_resultStandardScheme extends StandardScheme<setSensitiveObjects_result> {
 
-      public void read(org.apache.thrift.protocol.TProtocol iprot, heartbeat_result struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol iprot, setSensitiveObjects_result struct) throws org.apache.thrift.TException {
         org.apache.thrift.protocol.TField schemeField;
         iprot.readStructBegin();
         while (true)
@@ -1509,7 +1933,7 @@ public class AuditEvent {
         struct.validate();
       }
 
-      public void write(org.apache.thrift.protocol.TProtocol oprot, heartbeat_result struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol oprot, setSensitiveObjects_result struct) throws org.apache.thrift.TException {
         struct.validate();
 
         oprot.writeStructBegin(STRUCT_DESC);
@@ -1519,21 +1943,21 @@ public class AuditEvent {
 
     }
 
-    private static class heartbeat_resultTupleSchemeFactory implements SchemeFactory {
-      public heartbeat_resultTupleScheme getScheme() {
-        return new heartbeat_resultTupleScheme();
+    private static class setSensitiveObjects_resultTupleSchemeFactory implements SchemeFactory {
+      public setSensitiveObjects_resultTupleScheme getScheme() {
+        return new setSensitiveObjects_resultTupleScheme();
       }
     }
 
-    private static class heartbeat_resultTupleScheme extends TupleScheme<heartbeat_result> {
+    private static class setSensitiveObjects_resultTupleScheme extends TupleScheme<setSensitiveObjects_result> {
 
       @Override
-      public void write(org.apache.thrift.protocol.TProtocol prot, heartbeat_result struct) throws org.apache.thrift.TException {
+      public void write(org.apache.thrift.protocol.TProtocol prot, setSensitiveObjects_result struct) throws org.apache.thrift.TException {
         TTupleProtocol oprot = (TTupleProtocol) prot;
       }
 
       @Override
-      public void read(org.apache.thrift.protocol.TProtocol prot, heartbeat_result struct) throws org.apache.thrift.TException {
+      public void read(org.apache.thrift.protocol.TProtocol prot, setSensitiveObjects_result struct) throws org.apache.thrift.TException {
         TTupleProtocol iprot = (TTupleProtocol) prot;
       }
     }
